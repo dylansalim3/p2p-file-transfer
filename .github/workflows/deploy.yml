@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '18'
       - name: Install PNPM
         run: npm install -g pnpm
       
@@ -34,7 +34,7 @@ jobs:
       
       - name: Install Dependencies with PNPM
         run: pnpm install --frozen-lockfile
-        
+
       - name: Build
         run: npm run build
 
