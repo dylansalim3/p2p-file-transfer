@@ -3,10 +3,9 @@ import App from './App';
 
 const AppRouter: React.FC = () => {
     return (
-        <Router>
+        <Router basename="/p2p-file-transfer">
             <Routes>
                 <Route path="/:shareId*" element={<App />} />
-                {/* <Route path="/*" element={<App />} /> */}
             </Routes>
         </Router>
     );
