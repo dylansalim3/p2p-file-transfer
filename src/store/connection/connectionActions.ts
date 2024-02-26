@@ -36,6 +36,9 @@ export const connectPeer: (id: string) => (dispatch: Dispatch) => Promise<void>
             message.info("Receiving file " + file.fileName + " from " + id)
             if (file.dataType === DataType.FILE) {
                 download(file.file || '', file.fileName || "fileName", file.fileType)
+            } else if (file.dataType === DataType.MSG && file.message) {
+                console.log(file.message)
+                navigator.clipboard.writeText(file.message)
             }
         })
         dispatch(addConnectionList(id))

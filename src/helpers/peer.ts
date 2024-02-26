@@ -3,8 +3,8 @@ import {message} from "antd";
 
 export enum DataType {
     FILE = 'FILE',
-    OTHER = 'OTHER'
-
+    OTHER = 'OTHER',
+    MSG = 'MSG'
 }
 export interface Data {
     dataType: DataType
