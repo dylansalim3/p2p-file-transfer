@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import { Button, Card, Col, Input, Menu, MenuProps, message, Popover, QRCode, Row, Space, Typography, Upload, UploadFile } from "antd";
 import { CopyOutlined, QrcodeOutlined, UploadOutlined } from "@ant-design/icons";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
