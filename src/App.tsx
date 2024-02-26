@@ -30,6 +30,7 @@ function getItem(
 export const App: React.FC = () => {
     const { '*': shareId } = useParams();
     console.log(shareId)
+    console.log("shareId")
 
     const peer = useAppSelector((state) => state.peer)
     const connection = useAppSelector((state) => state.connection)
