@@ -1,7 +1,6 @@
 {
   "name": "p2p-file-transfer",
   "version": "0.1.0",
-  
   "homepage": "https://dylansalim3.github.io/p2p-file-transfer/",
   "type":"module",
   "dependencies": {
