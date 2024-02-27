@@ -27,10 +27,12 @@ function getItem(
     } as MenuItem;
 }
 
+function getUrlPrefix() {
+    return window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1)
+}
+
 export const App: React.FC = () => {
-    const { '*': shareId } = useParams();
-    console.log(shareId)
-    console.log("shareId")
+    const { shareId } = useParams();
 
     const peer = useAppSelector((state) => state.peer)
     const connection = useAppSelector((state) => state.connection)
@@ -109,11 +111,11 @@ export const App: React.FC = () => {
                         <Space direction="horizontal">
                             <div>ID: {peer.id}</div>
                             <Button icon={<CopyOutlined />} onClick={async () => {
-                                console.log(window.location.href + peer.id)
-                                await navigator.clipboard.writeText((window.location.href + peer.id) || "")
-                                message.info("Copied: " + window.location.href + peer.id)
+                                console.log(getUrlPrefix() + peer.id)
+                                await navigator.clipboard.writeText((getUrlPrefix() + peer.id) || "")
+                                message.info("Copied: " + getUrlPrefix() + peer.id)
                             }} />
-                            <Popover content={<QRCode value={window.location.href + (peer.id || "")} ></QRCode>}
+                            <Popover content={<QRCode value={getUrlPrefix() + (peer.id || "")} ></QRCode>}
                                 title="Scan Me"
                                 trigger="click">
                                 <Button icon={<QrcodeOutlined />} />
