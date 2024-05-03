@@ -3,6 +3,7 @@ import {Dispatch} from "redux";
 import {DataType, PeerConnection} from "../../helpers/peer";
 import {message} from "antd";
 import download from "js-file-download";
+import copy from 'copy-to-clipboard';
 
 export const changeConnectionInput = (id: string) => ({
     type: ConnectionActionType.CONNECTION_INPUT_CHANGE, id
@@ -38,7 +39,7 @@ export const connectPeer: (id: string) => (dispatch: Dispatch) => Promise<void>
                 download(file.file || '', file.fileName || "fileName", file.fileType)
             } else if (file.dataType === DataType.MSG && file.message) {
                 console.log(file.message)
-                navigator.clipboard.writeText(file.message)
+                copy(file.message)
             }
         })
         dispatch(addConnectionList(id))
