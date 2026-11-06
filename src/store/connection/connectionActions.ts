@@ -4,6 +4,7 @@ import {DataType, PeerConnection} from "../../helpers/peer";
 import {message} from "antd";
 import download from "js-file-download";
 import copy from 'copy-to-clipboard';
+import {addHistoryEntry} from "../history/historyActions";
 
 export const changeConnectionInput = (id: string) => ({
     type: ConnectionActionType.CONNECTION_INPUT_CHANGE, id
@@ -36,8 +37,10 @@ export const connectPeer: (id: string) => (dispatch: Dispatch) => Promise<void>
         PeerConnection.onConnectionReceiveData(id, (file) => {
             message.info("Receiving file " + file.fileName + " from " + id)
             if (file.dataType === DataType.FILE) {
+                dispatch(addHistoryEntry('received-file', file.fileName || "file", id))
                 download(file.file || '', file.fileName || "fileName", file.fileType)
             } else if (file.dataType === DataType.MSG && file.message) {
+                dispatch(addHistoryEntry('received-msg', file.message, id))
                 console.log(file.message)
                 copy(file.message)
             }

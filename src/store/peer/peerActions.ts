@@ -3,6 +3,7 @@ import {Dispatch} from "redux";
 import {DataType, PeerConnection} from "../../helpers/peer";
 import {message} from "antd";
 import {addConnectionList, removeConnectionList} from "../connection/connectionActions";
+import {addHistoryEntry} from "../history/historyActions";
 import download from "js-file-download";
 
 export const startPeerSession = (id: string) => ({
@@ -32,8 +33,10 @@ export const startPeer: () => (dispatch: Dispatch) => Promise<void>
             PeerConnection.onConnectionReceiveData(peerId, (file) => {
                 message.info("Receiving file " + file.fileName + " from " + peerId)
                 if (file.dataType === DataType.FILE) {
+                    dispatch(addHistoryEntry('received-file', file.fileName || "file", peerId))
                     download(file.file || '', file.fileName || "fileName", file.fileType)
                 } else if (file.dataType === DataType.MSG && file.message) {
+                    dispatch(addHistoryEntry('received-msg', file.message, peerId))
                     console.log(file.message)
                     navigator.clipboard.writeText(file.message)
                 }
