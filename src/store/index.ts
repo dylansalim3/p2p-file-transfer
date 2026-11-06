@@ -1,11 +1,18 @@
 import {configureStore} from '@reduxjs/toolkit'
+import {Reducer} from "redux";
 import {PeerReducer} from "./peer/peerReducer";
 import {ConnectionReducer} from "./connection/connectionReducer";
+import {PeerState} from "./peer/peerTypes";
+import {ConnectionState} from "./connection/connectionTypes";
 
+// The reducers are typed with the app's own discriminated action unions.
+// The store may also dispatch internal actions (e.g. @@redux/INIT), which
+// both reducers ignore via their default branch, so they are safe to widen
+// here; the cast only bridges the store's UnknownAction parameter type.
 export const store = configureStore({
     reducer: {
-        peer: PeerReducer,
-        connection: ConnectionReducer
+        peer: PeerReducer as Reducer<PeerState>,
+        connection: ConnectionReducer as Reducer<ConnectionState>
     }
 })
 

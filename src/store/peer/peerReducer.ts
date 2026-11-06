@@ -1,5 +1,5 @@
 import {Reducer} from "redux";
-import {PeerActionType, PeerState} from "./peerTypes";
+import {PeerAction, PeerActionType, PeerState} from "./peerTypes";
 
 export const initialState: PeerState = {
     id: undefined,
@@ -7,7 +7,7 @@ export const initialState: PeerState = {
     started: false
 }
 
-export const PeerReducer: Reducer<PeerState> = (state = initialState, action) => {
+export const PeerReducer: Reducer<PeerState, PeerAction> = (state = initialState, action) => {
     switch (action.type) {
         case PeerActionType.PEER_SESSION_START:
             const {id} = action
