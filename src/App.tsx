@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, ConfigProvider, Input, Progress, message, QRCode, Upload, UploadFile } from "antd";
-import { ArrowDownOutlined, ArrowUpOutlined, CheckOutlined, CloseOutlined, CopyOutlined, EnvironmentOutlined, FileOutlined, KeyOutlined, LinkOutlined, MessageOutlined, RadarChartOutlined, SendOutlined, UploadOutlined } from "@ant-design/icons";
+import { ArrowDownOutlined, ArrowUpOutlined, CheckOutlined, CloseOutlined, CopyOutlined, FileOutlined, KeyOutlined, LinkOutlined, MessageOutlined, RadarChartOutlined, SendOutlined, UploadOutlined } from "@ant-design/icons";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { changeDisplayName, startPeer, stopPeer } from "./store/peer/peerActions";
 import * as connectionAction from "./store/connection/connectionActions"
@@ -10,7 +10,7 @@ import { Transport } from "./helpers/transport";
 import { loadDisplayName } from "./helpers/displayName";
 import { useAsyncState } from "./helpers/hooks";
 import { useParams } from "react-router-dom"
-import "./beam.css";
+import "./share.css";
 
 function getUrlPrefix() {
     return window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1)
@@ -101,7 +101,6 @@ export const App: React.FC = () => {
     }
 
     const isConnected = connection.list.length > 0
-    const beamFill = !peer.started ? 0 : !isConnected ? 33 : history.entries.length === 0 ? 66 : 100
     const status = !peer.started
         ? { label: 'Not started', cls: '' }
         : !isConnected
@@ -112,29 +111,34 @@ export const App: React.FC = () => {
     return (
         <ConfigProvider theme={{
             token: {
-                colorPrimary: '#0f766e',
-                colorLink: '#0f766e',
-                colorText: '#16181d',
-                colorTextSecondary: '#4a4f57',
-                colorError: '#cf222e',
-                colorBgLayout: '#f6f4ef',
-                borderRadius: 6,
+                colorPrimary: '#0f6eaa',
+                colorLink: '#0f6eaa',
+                colorText: '#1b2a38',
+                colorTextSecondary: '#5b7285',
+                colorError: '#974a63',
+                colorTextPlaceholder: '#5b7285',
+                colorBgLayout: '#d9eaf5',
+                borderRadius: 16,
+                fontFamily: '"Nunito", ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
             }
         }}>
-            <main className="beam-page">
-                <header className="beam-header">
-                    <h1 className="beam-title">P2P File Transfer</h1>
-                    <span className={`beam-status ${status.cls}`} role="status">
-                        <span className="beam-dot-signal" aria-hidden="true" />
+            <main className="deck-page">
+                <header className="deck-header">
+                    <span className="deck-avatar" aria-hidden="true">{(peer.displayName || nameInput || 'P').trim().charAt(0).toUpperCase()}</span>
+                    <div className="deck-title-block">
+                        <h1 className="deck-title">P2P File Transfer</h1>
+                    </div>
+                    <span className={`deck-status ${status.cls}`} role="status">
+                        <span className="deck-dot-signal" aria-hidden="true" />
                         {status.label}
                     </span>
                 </header>
-                <p className="beam-tagline">Send a file straight to the phone next to you. No server, no upload. The beam goes direct.</p>
+                <p className="deck-tagline">Send a file straight to the phone next to you. No server, no upload. It goes direct.</p>
 
                 {!peer.started && (
-                    <section className="beam-start-panel" aria-label="Start a session">
+                    <section className="deck-start-panel" aria-label="Start a session">
                         <p>Start a session and your ID and QR code appear here. The other phone scans it, connects, and you send.</p>
-                        <label className="beam-name-label" htmlFor="displayName">Your name on the other phone</label>
+                        <label className="deck-name-label" htmlFor="displayName">Your name on the other phone</label>
                         <Input
                             id="displayName"
                             value={nameInput}
@@ -147,48 +151,80 @@ export const App: React.FC = () => {
                 )}
 
                 {peer.started && (
-                    <ol className="beam-steps" style={{ '--beam-fill': `${beamFill}%` } as React.CSSProperties}>
-                        <li className={`beam-step ${peer.started ? 'is-done' : ''}`}>
-                            <span className="beam-step-dot" aria-hidden="true">{peer.started ? <CheckOutlined /> : '1'}</span>
-                            <div className="beam-step-body">
-                                <h2 className="beam-step-title">Your signal</h2>
-                                <p className="beam-step-hint">This is your address. The other phone scans the code, or opens your link.</p>
-                                <div className="beam-qr-panel">
-                                    <svg className="beam-qr-arcs" viewBox="0 0 120 120" aria-hidden="true">
-                                        <path d="M 118 4 A 114 114 0 0 0 4 118" fill="none" stroke="#2dd4a8" strokeWidth="2" />
-                                        <path d="M 118 28 A 90 90 0 0 0 28 118" fill="none" stroke="#2dd4a8" strokeWidth="2" opacity="0.6" />
-                                        <path d="M 118 52 A 66 66 0 0 0 52 118" fill="none" stroke="#2dd4a8" strokeWidth="2" opacity="0.35" />
-                                    </svg>
-                                    <div className="beam-qr-card">
+                    <ol className="deck-steps">
+                        <li className={`deck-step ${peer.started ? 'is-done' : ''}`}>
+                            <div className="deck-step-head">
+                                <span className="deck-step-chip deck-step-chip-step-1" aria-hidden="true">{peer.started ? <CheckOutlined /> : '1'}</span>
+                                <h2 className="deck-step-title">Your code</h2>
+                            </div>
+                            <div className="deck-step-body">
+                                <p className="deck-step-hint">This is your address. The other phone scans the code, or opens your link.</p>
+                                <div className="deck-qr-panel">
+                                    <div className="deck-qr-card">
                                         <QRCode value={getUrlPrefix() + (peer.id || "")} size={216} bordered={false} />
                                     </div>
-                                    <p className="beam-id-label">Your ID</p>
-                                    <p className="beam-id">{peer.id}</p>
-                                    <p className="beam-id-label">Appearing as</p>
-                                    <p className="beam-display-name">{peer.displayName}</p>
-                                    <Button onClick={async () => {
+                                    <p className="deck-id-label">Your ID</p>
+                                    <p className="deck-id">{peer.id}</p>
+                                    <p className="deck-id-label">Appearing as</p>
+                                    <p className="deck-display-name">{peer.displayName}</p>
+                                    <Button type="primary" onClick={async () => {
                                         await navigator.clipboard.writeText((getUrlPrefix() + peer.id) || "")
                                         message.info("Copied: " + getUrlPrefix() + peer.id)
                                     }} icon={<CopyOutlined />}>Copy link</Button>
                                     <div>
-                                        <Button type="text" className="beam-stop" danger onClick={handleStopSession}>Stop session</Button>
+                                        <Button type="text" className="deck-stop" danger onClick={handleStopSession}>Stop session</Button>
                                     </div>
                                 </div>
                             </div>
                         </li>
 
-                        <li className={`beam-step ${isConnected ? 'is-done' : 'is-now'}`}>
-                            <span className="beam-step-dot" aria-hidden="true">{isConnected ? <CheckOutlined /> : '2'}</span>
-                            <div className="beam-step-body">
-                                <h2 className="beam-step-title">Connect</h2>
-                                <p className="beam-step-hint">Find the other phone nearby, join the same code, or paste its ID, then tap it and wait for the other side to accept.</p>
-                                <div className="beam-panel">
+                        <li className={`deck-step ${isConnected ? 'is-done' : 'is-now'}`}>
+                            <div className="deck-step-head">
+                                <span className="deck-step-chip deck-step-chip-step-2" aria-hidden="true">{isConnected ? <CheckOutlined /> : '2'}</span>
+                                <h2 className="deck-step-title">Connect</h2>
+                            </div>
+                            <div className="deck-step-body">
+                                <p className="deck-step-hint">Find the other phone nearby, join the same code, or paste its ID, then tap it and wait for the other side to accept.</p>
+                                <figure className="deck-exchange">
+                                    <svg className="deck-exchange-art" viewBox="0 0 300 96" aria-hidden="true">
+                                        <g transform="rotate(-8 28 22)">
+                                            <rect x="18" y="10" width="20" height="24" rx="4" style={{ fill: 'var(--deck-file-yellow)' }} />
+                                            <rect x="22" y="16" width="12" height="2.5" rx="1.25" fill="#ffffff" opacity="0.85" />
+                                            <rect x="22" y="21" width="12" height="2.5" rx="1.25" fill="#ffffff" opacity="0.85" />
+                                        </g>
+                                        <g transform="rotate(8 272 20)">
+                                            <rect x="262" y="8" width="20" height="24" rx="4" style={{ fill: 'var(--deck-ready)' }} />
+                                            <rect x="266" y="14" width="12" height="2.5" rx="1.25" fill="#ffffff" opacity="0.85" />
+                                            <rect x="266" y="19" width="12" height="2.5" rx="1.25" fill="#ffffff" opacity="0.85" />
+                                        </g>
+                                        <g transform="rotate(-4 150 14)">
+                                            <rect x="140" y="2" width="20" height="24" rx="4" style={{ fill: 'var(--deck-file-purple)' }} />
+                                            <rect x="144" y="8" width="12" height="2.5" rx="1.25" fill="#ffffff" opacity="0.85" />
+                                            <rect x="144" y="13" width="12" height="2.5" rx="1.25" fill="#ffffff" opacity="0.85" />
+                                        </g>
+                                        <rect x="36" y="30" width="58" height="58" rx="12" fill="#ffffff" style={{ stroke: 'var(--deck-send)' }} strokeWidth="2.5" />
+                                        <rect x="46" y="42" width="38" height="6" rx="3" style={{ fill: 'var(--deck-send-soft)' }} />
+                                        <rect x="46" y="54" width="26" height="6" rx="3" style={{ fill: 'var(--deck-send-soft)' }} />
+                                        <rect x="206" y="30" width="58" height="58" rx="12" fill="#ffffff" style={{ stroke: 'var(--deck-receive)' }} strokeWidth="2.5" />
+                                        <rect x="216" y="42" width="38" height="6" rx="3" style={{ fill: 'var(--deck-receive-soft)' }} />
+                                        <rect x="216" y="54" width="26" height="6" rx="3" style={{ fill: 'var(--deck-receive-soft)' }} />
+                                        <g className="deck-exchange-arrow-blue">
+                                            <path d="M 98 38 C 128 18, 172 18, 198 34" fill="none" style={{ stroke: 'var(--deck-send)' }} strokeWidth="3" strokeLinecap="round" />
+                                            <path d="M 202 36 L 189 29 L 192 43 Z" style={{ fill: 'var(--deck-send)' }} />
+                                        </g>
+                                        <g className="deck-exchange-arrow-pink">
+                                            <path d="M 202 72 C 172 90, 128 90, 102 76" fill="none" style={{ stroke: 'var(--deck-receive)' }} strokeWidth="3" strokeLinecap="round" />
+                                            <path d="M 98 74 L 111 67 L 108 81 Z" style={{ fill: 'var(--deck-receive)' }} />
+                                        </g>
+                                    </svg>
+                                    <figcaption className="deck-exchange-caption">The file goes straight across</figcaption>
+                                </figure>
                                     {discovery.incoming.length > 0 && (
-                                        <div className="beam-requests" role="group" aria-label="Connection requests">
+                                        <div className="deck-requests" role="group" aria-label="Connection requests">
                                             {discovery.incoming.map(req => (
-                                                <div key={req.peerId} className="beam-request">
-                                                    <span className="beam-request-text"><strong>{req.name}</strong> wants to connect</span>
-                                                    <div className="beam-request-actions">
+                                                <div key={req.peerId} className="deck-request">
+                                                    <span className="deck-request-text"><strong>{req.name}</strong> wants to connect</span>
+                                                    <div className="deck-request-actions">
                                                         <Button type="primary" onClick={() => dispatch(acceptPeer(req.peerId))}>Accept</Button>
                                                         <Button onClick={() => dispatch(declinePeer(req.peerId))} icon={<CloseOutlined />}>Decline</Button>
                                                     </div>
@@ -197,63 +233,69 @@ export const App: React.FC = () => {
                                         </div>
                                     )}
 
-                                    <h3 className="beam-connect-title"><EnvironmentOutlined /> Nearby devices</h3>
-                                    <p className="beam-note beam-note-tight">Uses your approximate area only, never your exact location.</p>
-                                    <Button
-                                        block
-                                        onClick={() => dispatch(findNearby())}
-                                        loading={discovery.nearbyLocating}
-                                        disabled={discovery.nearbyActive}
-                                        icon={<RadarChartOutlined />}
-                                    >
-                                        {discovery.nearbyActive ? 'Looking for devices nearby…' : 'Find nearby devices'}
-                                    </Button>
-                                    {discovery.nearbyError && <p className="beam-error" role="alert">{discovery.nearbyError}</p>}
-
-                                    <h3 className="beam-connect-title"><KeyOutlined /> Join with a code</h3>
-                                    <div className="beam-row">
-                                        <Input
-                                            placeholder="4–6 letter code"
-                                            value={codeInput}
-                                            maxLength={6}
-                                            onChange={e => setCodeInput(e.target.value)}
-                                            aria-label="Short code"
-                                        />
-                                        <Button onClick={() => { dispatch(joinCodeRoom(codeInput)); setCodeInput("") }}>Join</Button>
+                                    <div className="deck-method">
+                                        <h3 className="deck-connect-title"><span className="deck-connect-icon deck-connect-icon-blue"><RadarChartOutlined /></span> Nearby devices</h3>
+                                        <p className="deck-note deck-note-tight">Uses your approximate area only, never your exact location.</p>
+                                        <Button
+                                            block
+                                            onClick={() => dispatch(findNearby())}
+                                            loading={discovery.nearbyLocating}
+                                            disabled={discovery.nearbyActive}
+                                            icon={<RadarChartOutlined />}
+                                        >
+                                            {discovery.nearbyActive ? 'Looking for devices nearby…' : 'Find nearby devices'}
+                                        </Button>
+                                        {discovery.nearbyError && <p className="deck-error" role="alert">{discovery.nearbyError}</p>}
                                     </div>
-                                    {discovery.codeRoom && <p className="beam-note">In code room “{discovery.codeRoom}”. The other phone enters the same code.</p>}
 
-                                    <h3 className="beam-connect-title"><LinkOutlined /> Paste an ID or link code</h3>
-                                    <div className="beam-row">
-                                        <Input
-                                            placeholder="Phone ID"
-                                            value={connection.id}
-                                            onChange={e => dispatch(connectionAction.changeConnectionInput(e.target.value))}
-                                            required={true}
-                                            aria-label="Other phone's ID"
-                                        />
-                                        <Button type="primary" onClick={handleConnectOtherPeer} loading={connection.loading}>Connect</Button>
+                                    <div className="deck-method">
+                                        <h3 className="deck-connect-title"><span className="deck-connect-icon deck-connect-icon-pink"><KeyOutlined /></span> Join with a code</h3>
+                                        <div className="deck-row">
+                                            <Input
+                                                placeholder="4–6 letter code"
+                                                value={codeInput}
+                                                maxLength={6}
+                                                onChange={e => setCodeInput(e.target.value)}
+                                                aria-label="Short code"
+                                            />
+                                            <Button onClick={() => { dispatch(joinCodeRoom(codeInput)); setCodeInput("") }}>Join</Button>
+                                        </div>
+                                        {discovery.codeRoom && <p className="deck-note">In code room “{discovery.codeRoom}”. The other phone enters the same code.</p>}
+                                    </div>
+
+                                    <div className="deck-method">
+                                        <h3 className="deck-connect-title"><span className="deck-connect-icon deck-connect-icon-green"><LinkOutlined /></span> Paste an ID or link code</h3>
+                                        <div className="deck-row">
+                                            <Input
+                                                placeholder="Phone ID"
+                                                value={connection.id}
+                                                onChange={e => dispatch(connectionAction.changeConnectionInput(e.target.value))}
+                                                required={true}
+                                                aria-label="Other phone's ID"
+                                            />
+                                            <Button type="primary" onClick={handleConnectOtherPeer} loading={connection.loading}>Connect</Button>
+                                        </div>
                                     </div>
 
                                     {unconnected.length > 0 && (
-                                        <div className="beam-peer-list" style={{ marginTop: 16 }}>
+                                        <div className="deck-peer-list" style={{ marginTop: 16 }}>
                                             {unconnected.map(found => {
                                                 const requested = discovery.outgoing.includes(found.peerId)
                                                 return (
                                                     <button
                                                         key={found.peerId}
                                                         type="button"
-                                                        className="beam-peer beam-peer-stacked"
+                                                        className="deck-peer deck-peer-stacked"
                                                         disabled={requested}
                                                         onClick={() => dispatch(requestPeer(found.peerId))}
                                                     >
-                                                        <span className="beam-peer-top">
-                                                            <span className="beam-peer-name">{found.name}</span>
-                                                            <span className="beam-peer-via">{viaLabel(found.via)}</span>
+                                                        <span className="deck-peer-top">
+                                                            <span className="deck-peer-name">{found.name}</span>
+                                                            <span className="deck-peer-via">{viaLabel(found.via)}</span>
                                                         </span>
-                                                        <span className="beam-peer-bottom">
-                                                            <span className="beam-peer-id">{found.peerId.slice(0, 8)}</span>
-                                                            <span className="beam-peer-state">{requested ? 'Request sent…' : 'Tap to connect'}</span>
+                                                        <span className="deck-peer-bottom">
+                                                            <span className="deck-peer-id">{found.peerId.slice(0, 8)}</span>
+                                                            <span className="deck-peer-state">{requested ? 'Request sent…' : 'Tap to connect'}</span>
                                                         </span>
                                                     </button>
                                                 )
@@ -262,59 +304,58 @@ export const App: React.FC = () => {
                                     )}
 
                                     {connection.list.length === 0 ? (
-                                        <p className="beam-note">
-                                            {unconnected.length === 0 && <><span className="beam-dot-signal" aria-hidden="true" /> Listening for a device…</>}
+                                        <p className="deck-note">
+                                            {unconnected.length === 0 && <><span className="deck-dot-signal" aria-hidden="true" /> Listening for a device…</>}
                                         </p>
                                     ) : (
-                                        <div className="beam-peer-list" style={{ marginTop: 12 }}>
+                                        <div className="deck-peer-list" style={{ marginTop: 12 }}>
                                             {connection.list.map(peerId => (
                                                 <button
                                                     key={peerId}
                                                     type="button"
-                                                    className={`beam-peer beam-peer-stacked ${connection.selectedId === peerId ? 'is-selected' : ''}`}
+                                                    className={`deck-peer deck-peer-stacked ${connection.selectedId === peerId ? 'is-selected' : ''}`}
                                                     aria-pressed={connection.selectedId === peerId}
                                                     onClick={() => dispatch(connectionAction.selectItem(peerId))}
                                                 >
-                                                    <span className="beam-peer-top">
-                                                        <span className="beam-peer-name">{nameOf(peerId)}</span>
-                                                        <span className="beam-signal-bars" aria-hidden="true"><i /><i /><i /><i /></span>
+                                                    <span className="deck-peer-top">
+                                                        <span className="deck-peer-name">{nameOf(peerId)}</span>
                                                     </span>
-                                                    <span className="beam-peer-bottom">
-                                                        <span className="beam-peer-id">{peerId.slice(0, 8)}</span>
-                                                        <span className="beam-peer-state">Connected</span>
+                                                    <span className="deck-peer-bottom">
+                                                        <span className="deck-peer-id">{peerId.slice(0, 8)}</span>
+                                                        <span className="deck-peer-state">Connected</span>
                                                     </span>
                                                 </button>
                                             ))}
                                         </div>
                                     )}
-                                </div>
                             </div>
                         </li>
 
-                        <li className={`beam-step ${history.entries.length > 0 ? 'is-done' : isConnected ? 'is-now' : ''}`}>
-                            <span className="beam-step-dot" aria-hidden="true">{history.entries.length > 0 ? <CheckOutlined /> : '3'}</span>
-                            <div className="beam-step-body">
-                                <h2 className="beam-step-title">Send</h2>
-                                <p className="beam-step-hint">
+                        <li className={`deck-step ${history.entries.length > 0 ? 'is-done' : isConnected ? 'is-now' : ''}`}>
+                            <div className="deck-step-head">
+                                <span className="deck-step-chip deck-step-chip-step-3" aria-hidden="true">{history.entries.length > 0 ? <CheckOutlined /> : '3'}</span>
+                                <h2 className="deck-step-title">Send</h2>
+                            </div>
+                            <div className="deck-step-body">
+                                <p className="deck-step-hint">
                                     {connection.selectedId
                                         ? <>Sending to <span style={{ display: 'inline', wordBreak: 'break-all' }}>{nameOf(connection.selectedId)}</span>. Pick a file or write a message.</>
                                         : 'Connect to a device first, then pick a file or write a message.'}
                                 </p>
-                                <div className="beam-panel">
                                     {discovery.receiving && (
-                                        <p className="beam-note beam-note-tight" role="status">
+                                        <p className="deck-note deck-note-tight" role="status">
                                             Receiving {discovery.receiving.name}… {discovery.receiving.percent}%
                                         </p>
                                     )}
-                                    <div className={`beam-file-zone ${fileList.length > 0 ? 'has-file' : ''}`}>
+                                    <div className={`deck-file-zone ${fileList.length > 0 ? 'has-file' : ''}`}>
                                         {fileList.length > 0 ? (
                                             <>
-                                                <span className="beam-file-name"><FileOutlined /> {(fileList[0] as unknown as File).name}</span>
+                                                <span className="deck-file-name"><FileOutlined /> {(fileList[0] as unknown as File).name}</span>
                                                 <Button type="primary" onClick={() => handleUpload('file')} loading={sendLoading} icon={<SendOutlined />}>
                                                     {sendLoading ? 'Sending…' : 'Send file'}
                                                 </Button>
                                                 {sendProgress !== null && (
-                                                    <div className="beam-progress">
+                                                    <div className="deck-progress">
                                                         <Progress percent={sendProgress} status="active" />
                                                     </div>
                                                 )}
@@ -334,8 +375,8 @@ export const App: React.FC = () => {
                                             </Upload>
                                         )}
                                     </div>
-                                    <div className="beam-divider">Or</div>
-                                    <div className="beam-msg-row">
+                                    <div className="deck-divider">Or</div>
+                                    <div className="deck-msg-row">
                                         <Input
                                             placeholder="Write a message"
                                             value={msgToSend}
@@ -353,35 +394,40 @@ export const App: React.FC = () => {
                                             {sendLoading ? 'Sending…' : 'Send'}
                                         </Button>
                                     </div>
-                                    <p className="beam-note">Files download on the other phone automatically. Messages are copied to its clipboard.</p>
-                                </div>
+                                    <p className="deck-note">Files download on the other phone automatically. Messages are copied to its clipboard.</p>
                             </div>
                         </li>
                     </ol>
                 )}
 
                 {peer.started && (
-                    <section className="beam-history" aria-label="Transfer history">
-                        <h2 className="beam-history-title">History</h2>
+                    <section className="deck-history" aria-label="Transfer history">
+                        <h2 className="deck-history-title">History</h2>
                         {history.entries.length === 0 ? (
-                            <p className="beam-history-empty">Nothing sent or received yet this session. Your transfers will show up here.</p>
+                            <p className="deck-history-empty">Nothing sent or received yet this session. Your transfers will show up here.</p>
                         ) : (
-                            <ul className="beam-history-list">
-                                {history.entries.map(entry => (
-                                    <li key={entry.id} className="beam-history-item">
-                                        {entry.kind.startsWith('sent') ? <ArrowUpOutlined aria-hidden="true" /> : <ArrowDownOutlined aria-hidden="true" />}
-                                        {entry.kind.endsWith('file') ? <FileOutlined aria-hidden="true" /> : <MessageOutlined aria-hidden="true" />}
-                                        <span className="beam-history-label">
-                                            {entry.kind === 'sent-file' && `Sent file ${entry.label}`}
-                                            {entry.kind === 'sent-msg' && `Sent “${entry.label}”`}
-                                            {entry.kind === 'received-file' && `Received file ${entry.label}`}
-                                            {entry.kind === 'received-msg' && `Received “${entry.label}”`}
-                                        </span>
-                                        <span className="beam-history-peer">{entry.peerId}</span>
-                                        <time className="beam-history-time">{formatTime(entry.at)}</time>
-                                    </li>
-                                ))}
-                            </ul>
+                            <div className="deck-history-card">
+                                <ul className="deck-history-list">
+                                    {history.entries.map(entry => (
+                                        <li key={entry.id} className="deck-history-item">
+                                            <span className={`deck-history-direction ${entry.kind.startsWith('sent') ? 'deck-history-direction-sent' : 'deck-history-direction-received'}`} aria-hidden="true">
+                                                {entry.kind.startsWith('sent') ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
+                                            </span>
+                                            <span className="deck-history-type" aria-hidden="true">
+                                                {entry.kind.endsWith('file') ? <FileOutlined /> : <MessageOutlined />}
+                                            </span>
+                                            <span className="deck-history-label">
+                                                {entry.kind === 'sent-file' && `Sent file ${entry.label}`}
+                                                {entry.kind === 'sent-msg' && `Sent “${entry.label}”`}
+                                                {entry.kind === 'received-file' && `Received file ${entry.label}`}
+                                                {entry.kind === 'received-msg' && `Received “${entry.label}”`}
+                                            </span>
+                                            <span className="deck-history-peer">{entry.peerId}</span>
+                                            <time className="deck-history-time">{formatTime(entry.at)}</time>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                         )}
                     </section>
                 )}

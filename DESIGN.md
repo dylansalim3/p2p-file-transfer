@@ -1,31 +1,41 @@
 ---
 name: P2P File Transfer
-description: Direct device-to-device file transfer in the browser — the screen is a signal, the QR code is the address.
+description: Direct device-to-device file transfer in the browser — a friendly share deck on a pale sky.
 colors:
-  signal: "#0f766e"
-  signal-bright: "#2dd4a8"
-  signal-soft: "#f0faf7"
-  ink: "#16181d"
-  ink-soft: "#4a4f57"
-  paper: "#f6f4ef"
-  line: "#d8d2c4"
-  wait: "#92400e"
-  danger: "#cf222e"
+  sky: "#d9eaf5"
+  sky-tint: "#a3d0e9"
+  mist: "#eaf3f9"
   card: "#ffffff"
+  ink: "#1b2a38"
+  ink-soft: "#5b7285"
+  ink-soft-sky: "#42586a"
+  line: "#c7d8e5"
+  send: "#0f6eaa"
+  send-soft: "#e3f0f8"
+  receive: "#d6336c"
+  receive-soft: "#fce8f0"
+  receive-deep: "#b02a5c"
+  ready: "#2e7d52"
+  ready-soft: "#e2f3e8"
+  ready-deep: "#256b45"
+  mauve: "#974a63"
+  file-purple: "#7c5cbf"
+  file-yellow: "#d9a514"
+  grey: "#8ba6b4"
 typography:
   display:
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+    fontFamily: "Nunito, ui-rounded, 'SF Pro Rounded', system-ui, sans-serif"
     fontSize: "26px"
-    fontWeight: 700
+    fontWeight: 900
     lineHeight: 1.15
     letterSpacing: "-0.02em"
   title:
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
-    fontSize: "17px"
-    fontWeight: 700
+    fontFamily: "Nunito, ui-rounded, 'SF Pro Rounded', system-ui, sans-serif"
+    fontSize: "18px"
+    fontWeight: 800
     lineHeight: 1.3
   body:
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+    fontFamily: "Nunito, ui-rounded, 'SF Pro Rounded', system-ui, sans-serif"
     fontSize: "15px"
     fontWeight: 400
     lineHeight: 1.5
@@ -34,10 +44,35 @@ typography:
     fontSize: "13px"
     fontWeight: 400
     lineHeight: 1.4
+  small:
+    fontFamily: "Nunito, ui-rounded, 'SF Pro Rounded', system-ui, sans-serif"
+    fontSize: "12px"
+    fontWeight: 400
+    lineHeight: 1.4
+  note:
+    fontFamily: "Nunito, ui-rounded, 'SF Pro Rounded', system-ui, sans-serif"
+    fontSize: "14px"
+    fontWeight: 400
+    lineHeight: 1.5
+  button:
+    fontFamily: "Nunito, ui-rounded, 'SF Pro Rounded', system-ui, sans-serif"
+    fontSize: "16px"
+    fontWeight: 800
+    lineHeight: 1.2
+  icon:
+    fontFamily: "Nunito, ui-rounded, 'SF Pro Rounded', system-ui, sans-serif"
+    fontSize: "17px"
+    fontWeight: 400
+    lineHeight: 1
+  avatar:
+    fontFamily: "Nunito, ui-rounded, 'SF Pro Rounded', system-ui, sans-serif"
+    fontSize: "20px"
+    fontWeight: 900
+    lineHeight: 1
 rounded:
-  sm: "6px"
-  md: "8px"
-  lg: "12px"
+  sm: "12px"
+  md: "16px"
+  lg: "20px"
   pill: "999px"
 spacing:
   sm: "8px"
@@ -45,137 +80,147 @@ spacing:
   lg: "28px"
 components:
   button-primary:
-    backgroundColor: "{colors.signal}"
+    backgroundColor: "{colors.send}"
     textColor: "{colors.card}"
-    rounded: "{rounded.sm}"
-    height: "48px"
+    rounded: "{rounded.pill}"
+    height: "52px"
   button-primary-hover:
-    backgroundColor: "{colors.signal}"
+    backgroundColor: "{colors.send}"
   panel:
     backgroundColor: "{colors.card}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.md}"
-  qr-panel:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.paper}"
     rounded: "{rounded.lg}"
+  qr-panel:
+    backgroundColor: "{colors.mist}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.md}"
 ---
 
 # Design System: P2P File Transfer
 
 ## Overview
 
-**Creative North Star: "The Direct Beam"**
+**Creative North Star: "The Share Deck"**
 
-The screen is a signal, not a form. One phone beams a file straight to the phone next to it — no server, no upload — and the interface shows that beam: a large QR code as the address, a vertical line joining three steps that fills in as each one completes, and connection state said in plain words with a signal meter beside it. The world is paper and ink with a single signal teal; the QR hero is the one dark moment on the page, so the brightest thing on screen is always the code someone needs to scan.
+Two phones hand a file to each other across a pale sky, and the screen says so in the language of a share sheet: a big pill Send, a pink Receive, file rows with names and times, a small drawn exchange of two phones. The world is copied from Maveric's Dribbble file-sharing concept (pale-blue canvas, pill tiles, Send/Receive pair, file rows), mapped onto the transfer flow — the concept's file manager content (categories, storage gauges) was left behind; this is a transfer tool, not a file manager.
 
-The system is restrained on purpose. This is a utility used for thirty seconds at a time, usually standing next to the other person, so every element earns its place by moving the transfer forward: start, connect, send, and a history of what crossed the beam. Nothing decorative competes with the QR code.
+The system is friendly on purpose. This is a utility used for thirty seconds at a time, usually standing next to the other person, so every element earns its place by moving the transfer forward: start, connect, send, and a history of what crossed between the phones. Colour does real jobs: blue is the send direction, pink is the receive direction, green is listening and ready.
 
 **Key Characteristics:**
-- Paper ground, ink panels, one signal teal — colour does real jobs (live, listening, done), never decoration.
-- Flat panels with thin ink borders; no gradients, no glass, no shadows as decoration.
+- Pale sky ground, white deck cards with soft shadows, heavily rounded (20px cards, pill buttons and tiles).
+- Deep blue is Send and primary; hot pink is the receive direction; green is listening and ready.
+- Nunito, a rounded geometric sans, self-hosted — extra-bold, tightly set headings.
 - Mono type only for IDs, codes, and timestamps — never as a costume.
-- Big touch targets (48px minimum), status always paired with a word, never colour alone.
+- Big touch targets (48px minimum, 52px for primary actions), status always paired with a word, never colour alone.
 
 ## Colors
 
-One accent on a paper-and-ink ground; the accent means "live signal" everywhere it appears.
+Two directions on a pale sky ground; each direction owns one colour everywhere it appears.
 
 ### Primary
-- **Signal Teal** (#0F766E): The live beam. Primary buttons, completed step dots, the filled beam rail, selected peer rows, "Connected" state. On paper it reads at about 5.7:1.
+- **Send Blue** (#0F6EAA): The send direction and the primary action. Primary buttons, the Copy link button, the selected peer row, the "Connected" state, step 1's chip. White on it reads at about 5.5:1.
 
 ### Secondary
-- **Signal Bright** (#2DD4A8): Signal teal's voice on dark ink — the "Your ID" label, the QR arc rings, the light inside the dark hero panel.
+- **Receive Pink** (#D6336C): The receive direction. Received history rows, the incoming-request card, step 2's chip. White on it reads at about 4.6:1. The deep variant (#B02A5C) is the undone step-2 numeral on the pink tint, where the base pink would fail the 4.5:1 floor.
+- **Ready Green** (#2E7D52): Listening and ready. The listening dot (pulsing), step 3's chip, the Link method icon. The deep variant (#256B45) is the undone step-3 numeral on the green tint.
 
 ### Tertiary
-- **Waiting Amber** (#92400E): The listening state only — the pulsing dot while the session waits for a device. Never used for success or as a general accent.
+- **Mauve** (#974A63): Stop session only. About 6:1 on white.
 
 ### Neutral
-- **Paper** (#F6F4EF): Page ground.
-- **Card White** (#FFFFFF): Panels and the QR card.
-- **Ink** (#16181D): Text, panel borders, the QR hero panel, the start panel.
-- **Ink Soft** (#4A4F57): Secondary text, hints, timestamps — about 7.5:1 on paper.
-- **Beam Line** (#D8D2C4): The unfilled stepper rail, dividers, unselected peer borders.
-- **Danger Red** (#CF222E): Stop session only.
+- **Sky** (#D9EAF5): Page ground — a lightened tint of the concept's canvas blue.
+- **Sky Tint** (#A3D0E9): The concept's canvas blue itself, used for the exchange illustration panel.
+- **Mist** (#EAF3F9): Inner tiles and the QR panel ground.
+- **Card White** (#FFFFFF): Deck cards and the QR card.
+- **Ink** (#1B2A38): Text, a navy ink tinted from the blue world — about 14.6:1 on white.
+- **Ink Soft** (#5B7285): Secondary text on white cards — about 5:1 on white. Never on the sky or mist ground, where it falls under the floor.
+- **Ink Soft Sky** (#42586A): Secondary text on sky and mist grounds — about 6:1 on sky, 6.6:1 on mist.
+- **Sky Line** (#C7D8E5): Dividers, unselected peer borders.
+- **File Purple** (#7C5CBF) and **File Yellow** (#D9A514): File-type colours, used only inside the drawn exchange illustration.
 
 ### Named Rules
-**The One Signal Rule.** Teal means the beam is live. Nothing else on the screen is teal, and nothing live is any other colour except amber while it waits.
+**The Two-Direction Rule.** Blue means out (send), pink means in (receive). Never swap them, and never use either as decoration.
+**The Mono Is Data Rule.** If it is not an ID, a code, or a timestamp, it is not set in mono.
 
 ## Typography
 
-**Display Font:** System sans stack (-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif) — no webfont dependency; the app must work with no network beyond the peer connection.
-**Body Font:** Same system sans stack.
+**Display Font:** Nunito (variable font, weights 400–900), self-hosted at `public/fonts/nunito.woff2` — no external font dependency; the app must work with no network beyond the peer connection. Fallback stack is `ui-rounded, "SF Pro Rounded", system-ui, sans-serif`.
+**Body Font:** Same Nunito stack.
 **Label/Mono Font:** ui-monospace, SFMono-Regular, Menlo, Consolas, monospace — for peer IDs, session IDs, and timestamps only.
 
-**Character:** A workhorse grotesque with 700 for the title, step titles and step dots, and mono where the content is literally a code.
+**Character:** A rounded geometric sans with 900 for the page title, 800 for step titles, headings and buttons, and mono where the content is literally a code.
 
 ### Hierarchy
-- **Display** (700, 26px, 1.15, -0.02em): The page title, "P2P File Transfer", once per screen.
-- **Title** (700, 17px, 1.3): Step titles ("Your signal", "Connect", "Send") and the History heading.
+- **Display** (900, 26px, 1.15, -0.02em): The page title, "P2P File Transfer", once per screen, beside the avatar circle.
+- **Title** (800, 18px, 1.3): Step titles ("Your code", "Connect", "Send") and the History heading.
 - **Body** (400, 15px, 1.5): Hints, notes, empty states.
-- **Label** (400, 13px, mono): Peer IDs and timestamps. The "Your ID" label and the "Or" divider are body face, sentence case, untracked (700, 12px) — changed from tracked uppercase in the Hallmark audit polish (2026-11-06), which overrules the old tracked-caps label voice.
-
-### Named Rules
-**The Mono Is Data Rule.** If it is not an ID, a code, or a timestamp, it is not set in mono.
+- **Label** (400, 13px, mono): Peer IDs and timestamps. The "Your ID" label is body face, sentence case, 800, 12px in Send blue.
+- **Small** (400, 12px, 1.4): Small labels and the via pill. **Note** (400, 14px, 1.5): Notes inside method tiles and the composer. **Button** (800, 16px, 1.2): Button text. **Icon** (17px) and **Avatar** (900, 20px): the method icon chips and the avatar initial.
 
 ## Layout
 
-A single centred column, max 560px, 16px side padding, generous vertical separation (28–32px between major sections, 12–16px inside groups). The header stacks vertically below 480px so the title never wraps next to the status pill. Steps are a vertical stepper: a 2px rail at 15px from the left joins 32px numbered dots; the rail fills teal from the top as steps complete. On phones the message composer stacks (input above a full-width Send button); the connect row stays horizontal because its input is short.
+A single centred column, max 560px, 16px side padding, generous vertical separation (16px between step cards, 24px before History). The header is an avatar circle with the user's initial, the bold title, and a status pill; below 480px the pill drops to its own line under the title, aligned with the title text, so the title never squeezes. Steps are white deck cards stacked vertically — no rail, no stepper line. On phones the message composer stacks (input above a full-width Send button).
 
 ## Elevation & Depth
 
-Flat by default. Depth is conveyed by ink borders (1.5px) and tonal layering (paper ground, white panels, one ink hero panel), never by shadow. There are no drop shadows anywhere in the system.
-
-### Named Rules
-**The Flat-By-Default Rule.** No shadows. A panel that needs emphasis gets a darker ground or a thicker border, not a blur.
+Soft shadows carry the depth: deck cards get a small offset plus a soft blur (`0 2px 6px rgba(27,42,56,0.06), 0 12px 28px rgba(27,42,56,0.08)`), tiles a lighter version. No hard offset shadows, no gradients, no glass. A panel that needs emphasis gets a deeper tint or a thicker border, not a blur.
 
 ## Shapes
 
-Corners are small and consistent: 6px for buttons and inputs, 8px for panels and peer rows, 12px for the ink hero/start panels, 999px only for the status pill and signal dots. Borders are 1.5px solid ink on panels, 1.5px dashed grey on the empty file zone, 2px teal on a selected peer row. The only curves that are not rectangles are the circular step dots, the status dots, and the quarter-arc signal rings drawn around the QR card.
+Corners are large and consistent: 12px for step chips and method icon chips, 16px for method tiles, inputs, the QR panel and peer rows, 20px for deck cards and the history card, 999px for buttons, the status pill, the via pill and direction chips. Borders are 1.5px solid sky line on peer rows, 1.5px dashed grey on the empty file zone, 2px send on a selected peer row. The only circles are the avatar, the status dots, the direction chips and the exchange phones' rounded corners.
 
 ## Components
 
 ### Buttons
-- **Shape:** 6px radius, min-height 48px, 700 weight.
-- **Primary:** Signal teal background, white text; full-width in the start panel and composer.
-- **Hover / Focus:** 2px teal focus outline with 2px offset; no hover shadow.
-- **Secondary / Ghost:** White "Copy link" button inside the ink hero (ink text on white); "Stop session" is a quiet text button in muted paper on ink.
+- **Shape:** Pill radius (999px), min-height 48px (52px for primary actions), 800 weight.
+- **Primary:** Send blue background, white text; full-width in the start panel, the QR panel (Copy link) and the composer.
+- **Hover / Focus:** 2px send focus outline with 2px offset; pressed state darkens slightly (brightness 0.96).
+- **Secondary:** White pill buttons for Find nearby devices, Join, Decline and Select a file. "Stop session" is a quiet mauve text button under the QR panel.
 
 ### Status pill
-- **Style:** White pill, 1.5px ink border, 999px radius, 13px semibold text, an 8px dot on the left.
-- **State:** Grey dot "Not started"; amber pulsing dot "Listening…"; teal dot "Connected to N devices".
+- **Style:** White pill, 1.5px sky-line border, 999px radius, 13px extra-bold text, an 8px dot on the left, soft tile shadow.
+- **State:** Grey dot "Not started"; green pulsing dot "Listening…"; blue dot "Connected to N devices".
 
 ### QR hero panel
-- **Style:** Ink background, 12px radius, centred; a white QR card (12px padding, 8px radius) holding a 216px QR code; three thin quarter-arc rings in signal bright at the top-right corner; "Your ID" label in signal bright above the mono ID; full-width Copy link button; quiet Stop session below.
+- **Style:** Mist background, 16px radius, centred; a white QR card (12px padding, 12px radius, soft shadow) holding a 216px QR code; "Your ID" label in Send blue above the mono ID; "Appearing as" and the display name in 800; full-width blue pill Copy link button; quiet mauve Stop session below.
 
-### Stepper
-- **Style:** Numbered 32px dots on a 2px rail; done dots are teal with a white check, the current dot is white with a teal ring and number, upcoming dots are grey-ringed. The rail fills teal from the top in proportion to real progress (started 33%, connected 66%, first transfer 100%).
+### Step cards
+- **Style:** White deck cards, 20px radius, soft shadow. Each opens with a head row: a 32px numbered chip and the step title in 800.
+- **Chips:** Step 1 blue, step 2 pink, step 3 green. Undone chips are the deep numeral on the matching tint (deep pink/green pass 4.5:1 where the base colours would not); done chips are solid with a white check.
+
+### Exchange illustration
+- **Style:** A drawn SVG inside a sky-tint panel (16px radius): two white phones with blue and pink outlines, a blue arrow curving one way and a pink arrow the other, three small floating file chips in purple, yellow and green. All fills and strokes come from the token block. The arrows nudge gently (one authored motion, disabled under prefers-reduced-motion). Caption below: "The file goes straight across".
+
+### Connect method tiles
+- **Style:** Mist tiles, 16px radius, one per method: Nearby devices (blue radar icon chip), Join with a code (pink key icon chip), Paste an ID or link code (green link icon chip). Notes inside the tiles use Ink Soft Sky for contrast on mist.
 
 ### Peer rows
-- **Style:** Full-width buttons, white, 1.5px line-coloured border, 8px radius, 56px min-height; mono peer ID truncated with ellipsis, four signal bars, and the word "Connected" in teal.
-- **Selected:** 2px teal border on a pale teal tint (#F0FAF7).
+- **Style:** Full-width buttons, white, 1.5px sky-line border, 16px radius, 56px min-height. Stacked: the peer name and a via pill on top, the short mono ID and the state word below — so a name never gets squeezed at 390px.
+- **Selected:** 2px Send border on a pale blue tint (#E3F0F8). Disabled (request sent): mist background, not-allowed cursor.
 
 ### Inputs / Fields
-- **Style:** 48px min-height, 6px radius, 1.5px border; focus is a 2px teal outline.
+- **Style:** 52px min-height, 16px radius, 1.5px border; focus is a 2px Send outline. Placeholders use Ink Soft (#5B7285, 5:1 on white) via the `colorTextPlaceholder` token.
 - **Disabled:** The message Send button is disabled until text is typed; the file Send button is hidden until a file is picked.
 
 ### Composer
-- **Style:** One white panel holding both send paths: a dashed file zone (solid teal border once a file is picked, showing its name and a Remove link) and, below an "Or" divider, the message input with its Send button. A note underneath states the real behaviour: files auto-download on the other phone, messages are copied to its clipboard.
+- **Style:** Inside the Send step card: a dashed file zone on mist (solid Send border and Send-soft ground once a file is picked, showing its name, a blue pill Send file button, real progress, and a Remove link) and, below an "Or" divider, the message input with its blue pill Send button. A note underneath states the real behaviour: files auto-download on the other phone, messages are copied to its clipboard.
 
 ### History
-- **Style:** A plain list under a hairline rule; each row carries a direction arrow (up = sent, down = received) and a type icon (file/message), a label that may wrap to two lines, the peer name in body face, and a mono timestamp. Empty state: one line of secondary text.
+- **Style:** A white deck card (20px radius, soft shadow) holding the rows; each row carries a direction chip (blue circle with an up arrow for sent, pink circle with a down arrow for received), a type icon (file/message), a label that may wrap to two lines, the peer name in body face, and a mono timestamp. Below 480px each row restacks: the label takes the full first line, peer and time sit on a second line, so a long filename stays readable. Empty state: one line of secondary text in its own deck card.
 
 ## Do's and Don'ts
 
 ### Do:
 - **Do** keep the QR code the largest, highest-contrast element on the screen.
 - **Do** pair every colour-coded state with a word ("Connected", "Listening…").
-- **Do** use 48px minimum touch targets for every action.
-- **Do** keep send progress honest: a "Sending…" button state, then a history entry — never a faked progress bar (PeerJS reports no byte progress).
+- **Do** use 48px minimum touch targets for every action (52px for primary).
+- **Do** keep send progress honest: a real percentage from the transport, then a history entry.
+- **Do** keep the exchange illustration drawn from tokens — every fill and stroke is a `var()`.
 
 ### Don't:
 - **Don't** hide the QR code behind a tap or a popover.
 - **Don't** use mono for anything that is not an ID, code, or timestamp.
-- **Don't** add gradients, glass, or shadows to this system.
-- **Don't** add a second accent colour — amber is only for waiting, red only for stop.
+- **Don't** add gradients, glass, or hard offset shadows to this system.
+- **Don't** swap the two directions — blue is always out, pink is always in.
+- **Don't** add a file manager to this screen — no categories, no storage gauges; this is a transfer tool.
 - **Don't** use an eyebrow/kicker label above a heading.

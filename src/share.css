@@ -1,0 +1,898 @@
+/* Skydeck — the P2P File Transfer visual world.
+   Pale sky ground, white deck cards, pill tiles and buttons.
+   Deep blue is Send; hot pink is the receive direction; green is
+   listening and ready. Nunito, self-hosted. Mono is only for IDs,
+   codes, and timestamps — never as a costume. */
+
+@font-face {
+    font-family: "Nunito";
+    font-style: normal;
+    font-weight: 400 900;
+    font-display: swap;
+    src: url("/fonts/nunito.woff2") format("woff2");
+}
+
+:root {
+    --deck-sky: #d9eaf5;
+    --deck-sky-tint: #a3d0e9;
+    --deck-mist: #eaf3f9;
+    --deck-card: #ffffff;
+    --deck-ink: #1b2a38;
+    --deck-ink-soft: #5b7285;
+    --deck-ink-soft-sky: #42586a;
+    --deck-line: #c7d8e5;
+    --deck-send: #0f6eaa;
+    --deck-send-soft: #e3f0f8;
+    --deck-receive: #d6336c;
+    --deck-receive-soft: #fce8f0;
+    --deck-receive-deep: #b02a5c;
+    --deck-ready: #2e7d52;
+    --deck-ready-soft: #e2f3e8;
+    --deck-ready-deep: #256b45;
+    --deck-ready-pulse: rgba(46, 125, 82, 0.45);
+    --deck-ready-pulse-zero: rgba(46, 125, 82, 0);
+    --deck-mauve: #974a63;
+    --deck-file-purple: #7c5cbf;
+    --deck-file-yellow: #d9a514;
+    --deck-grey: #8ba6b4;
+    --deck-shadow-card: 0 2px 6px rgba(27, 42, 56, 0.06), 0 12px 28px rgba(27, 42, 56, 0.08);
+    --deck-shadow-tile: 0 1px 3px rgba(27, 42, 56, 0.05), 0 6px 16px rgba(27, 42, 56, 0.06);
+    --deck-font: "Nunito", ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --deck-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+body {
+    background: var(--deck-sky);
+    color: var(--deck-ink);
+    font-family: var(--deck-font);
+    caret-color: var(--deck-send);
+    scrollbar-color: var(--deck-ink-soft) var(--deck-sky);
+}
+
+::selection {
+    background: var(--deck-send);
+    color: var(--deck-card);
+}
+
+:focus-visible {
+    outline: 2px solid var(--deck-send);
+    outline-offset: 2px;
+}
+
+/* ---------- page ---------- */
+
+.deck-page {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 20px 16px 56px;
+}
+
+.deck-page .ant-btn {
+    border-radius: 999px;
+    font-family: var(--deck-font);
+}
+
+.deck-page .ant-input {
+    font-family: var(--deck-font);
+}
+
+/* ---------- header ---------- */
+
+.deck-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.deck-avatar {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--deck-send);
+    color: var(--deck-card);
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.deck-title-block {
+    flex: 1;
+    min-width: 0;
+}
+
+.deck-title {
+    margin: 0;
+    font-size: 26px;
+    line-height: 1.15;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+.deck-tagline {
+    margin: 0 0 20px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--deck-ink-soft-sky);
+}
+
+/* ---------- status pill ---------- */
+
+.deck-status {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1.5px solid var(--deck-line);
+    border-radius: 999px;
+    background: var(--deck-card);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: var(--deck-shadow-tile);
+}
+
+.deck-status .deck-dot-signal {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--deck-grey);
+    flex-shrink: 0;
+}
+
+.deck-status.is-listening {
+    border-color: var(--deck-ready);
+    color: var(--deck-ready);
+}
+
+.deck-status.is-listening .deck-dot-signal {
+    background: var(--deck-ready);
+    animation: deck-pulse 1.6s ease-out infinite;
+}
+
+.deck-status.is-live {
+    border-color: var(--deck-send);
+    color: var(--deck-send);
+}
+
+.deck-status.is-live .deck-dot-signal {
+    background: var(--deck-send);
+}
+
+@keyframes deck-pulse {
+    0% { box-shadow: 0 0 0 0 var(--deck-ready-pulse); }
+    70% { box-shadow: 0 0 0 7px var(--deck-ready-pulse-zero); }
+    100% { box-shadow: 0 0 0 0 var(--deck-ready-pulse-zero); }
+}
+
+@media (max-width: 480px) {
+    .deck-header {
+        flex-wrap: wrap;
+    }
+
+    .deck-title-block {
+        flex-basis: 200px;
+    }
+
+    .deck-status {
+        margin-left: 56px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .deck-status.is-listening .deck-dot-signal {
+        animation: none;
+    }
+}
+
+/* ---------- start panel (before session) ---------- */
+
+.deck-start-panel {
+    padding: 28px 20px;
+    text-align: center;
+    background: var(--deck-card);
+    border-radius: 20px;
+    box-shadow: var(--deck-shadow-card);
+}
+
+.deck-start-panel p {
+    margin: 0 0 16px;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--deck-ink-soft);
+}
+
+.deck-start-panel .ant-btn {
+    width: 100%;
+    min-height: 56px;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+/* ---------- step cards ---------- */
+
+.deck-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.deck-step {
+    background: var(--deck-card);
+    border-radius: 20px;
+    box-shadow: var(--deck-shadow-card);
+    padding: 20px;
+}
+
+.deck-step-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.deck-step-chip {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.deck-step-chip-step-1 {
+    background: var(--deck-send-soft);
+    color: var(--deck-send);
+}
+
+.deck-step-chip-step-2 {
+    background: var(--deck-receive-soft);
+    color: var(--deck-receive-deep);
+}
+
+.deck-step-chip-step-3 {
+    background: var(--deck-ready-soft);
+    color: var(--deck-ready-deep);
+}
+
+.deck-step.is-done .deck-step-chip-step-1 {
+    background: var(--deck-send);
+    color: var(--deck-card);
+}
+
+.deck-step.is-done .deck-step-chip-step-2 {
+    background: var(--deck-receive);
+    color: var(--deck-card);
+}
+
+.deck-step.is-done .deck-step-chip-step-3 {
+    background: var(--deck-ready);
+    color: var(--deck-card);
+}
+
+.deck-step-title {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.3;
+    font-weight: 800;
+}
+
+.deck-step-hint {
+    margin: 0 0 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--deck-ink-soft);
+}
+
+.deck-step-body {
+    min-width: 0;
+}
+
+/* ---------- QR hero ---------- */
+
+.deck-qr-panel {
+    padding: 24px 20px 20px;
+    text-align: center;
+    background: var(--deck-mist);
+    border-radius: 16px;
+}
+
+.deck-qr-card {
+    display: inline-block;
+    padding: 12px;
+    background: var(--deck-card);
+    border-radius: 12px;
+    line-height: 0;
+    box-shadow: var(--deck-shadow-tile);
+}
+
+.deck-id-label {
+    margin: 16px 0 4px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--deck-send);
+}
+
+.deck-id {
+    margin: 0 0 16px;
+    font-family: var(--deck-mono);
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-all;
+    color: var(--deck-ink);
+}
+
+.deck-display-name {
+    margin: 0 0 16px;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.5;
+    word-break: break-all;
+    color: var(--deck-ink);
+}
+
+.deck-qr-panel .ant-btn {
+    width: 100%;
+    min-height: 52px;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.deck-stop {
+    margin-top: 12px;
+    color: var(--deck-mauve);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.deck-stop:hover {
+    color: var(--deck-mauve);
+    text-decoration: underline;
+}
+
+/* ---------- exchange illustration ---------- */
+
+.deck-exchange {
+    margin: 0 0 16px;
+    padding: 16px 16px 12px;
+    text-align: center;
+    background: var(--deck-sky-tint);
+    border-radius: 16px;
+}
+
+.deck-exchange-art {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    margin: 0 auto;
+}
+
+.deck-exchange-arrow-blue {
+    animation: deck-nudge-right 2.4s ease-in-out infinite alternate;
+}
+
+.deck-exchange-arrow-pink {
+    animation: deck-nudge-left 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes deck-nudge-right {
+    from { transform: translateX(0); }
+    to { transform: translateX(4px); }
+}
+
+@keyframes deck-nudge-left {
+    from { transform: translateX(0); }
+    to { transform: translateX(-4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .deck-exchange-arrow-blue,
+    .deck-exchange-arrow-pink {
+        animation: none;
+    }
+}
+
+.deck-exchange-caption {
+    margin: 8px 0 0;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.4;
+    color: var(--deck-ink);
+}
+
+/* ---------- connect method tiles ---------- */
+
+.deck-method {
+    padding: 16px;
+    background: var(--deck-mist);
+    border-radius: 16px;
+    margin-bottom: 12px;
+}
+
+.deck-method:last-child {
+    margin-bottom: 0;
+}
+
+.deck-connect-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px;
+    font-size: 15px;
+    line-height: 1.3;
+    font-weight: 800;
+}
+
+.deck-connect-icon {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    font-size: 17px;
+}
+
+.deck-connect-icon-blue {
+    background: var(--deck-send-soft);
+    color: var(--deck-send);
+}
+
+.deck-connect-icon-pink {
+    background: var(--deck-receive-soft);
+    color: var(--deck-receive);
+}
+
+.deck-connect-icon-green {
+    background: var(--deck-ready-soft);
+    color: var(--deck-ready);
+}
+
+.deck-method .ant-btn {
+    min-height: 48px;
+    font-weight: 800;
+}
+
+.deck-row {
+    display: flex;
+    gap: 8px;
+}
+
+.deck-row .ant-input {
+    min-height: 48px;
+}
+
+.deck-row .ant-btn {
+    flex-shrink: 0;
+}
+
+.deck-note {
+    margin: 12px 0 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--deck-ink-soft);
+}
+
+.deck-note .deck-dot-signal {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: var(--deck-ready);
+    animation: deck-pulse 1.6s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .deck-note .deck-dot-signal {
+        animation: none;
+    }
+}
+
+.deck-method .deck-note {
+    color: var(--deck-ink-soft-sky);
+}
+
+.deck-note-tight {
+    margin-top: 0;
+}
+
+.deck-error {
+    margin: 12px 0 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--deck-mauve);
+    font-weight: 700;
+}
+
+/* ---------- incoming requests ---------- */
+
+.deck-requests {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.deck-request {
+    padding: 16px;
+    background: var(--deck-receive-soft);
+    border: 1.5px solid var(--deck-receive);
+    border-radius: 16px;
+}
+
+.deck-request-text {
+    display: block;
+    margin-bottom: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.deck-request-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.deck-request-actions .ant-btn {
+    flex: 1;
+    min-height: 48px;
+    font-weight: 800;
+}
+
+/* ---------- peers ---------- */
+
+.deck-peer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.deck-peer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 56px;
+    padding: 8px 12px;
+    text-align: left;
+    background: var(--deck-card);
+    border: 1.5px solid var(--deck-line);
+    border-radius: 16px;
+    cursor: pointer;
+    color: var(--deck-ink);
+    font-family: var(--deck-font);
+}
+
+.deck-peer:hover {
+    border-color: var(--deck-ink);
+}
+
+.deck-peer.is-selected {
+    border-color: var(--deck-send);
+    border-width: 2px;
+    background: var(--deck-send-soft);
+}
+
+.deck-peer-id {
+    min-width: 0;
+    font-family: var(--deck-mono);
+    font-size: 13px;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.deck-peer-state {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--deck-send);
+}
+
+.deck-peer-name {
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.deck-peer .deck-peer-id {
+    flex: none;
+    font-size: 12px;
+    color: var(--deck-ink-soft);
+}
+
+.deck-peer-via {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--deck-mist);
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--deck-ink-soft-sky);
+}
+
+.deck-peer:disabled {
+    background: var(--deck-mist);
+    color: var(--deck-ink-soft);
+    cursor: not-allowed;
+}
+
+.deck-peer:disabled:hover {
+    border-color: var(--deck-line);
+}
+
+/* Discovered peers stack: name + source on one line, short ID + action below,
+   so a name never gets squeezed by the badge and the tap target at 390px. */
+.deck-peer-stacked {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.deck-peer-top,
+.deck-peer-bottom {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.deck-peer-top .deck-peer-name {
+    flex: 1;
+    min-width: 0;
+}
+
+.deck-peer-bottom .deck-peer-id {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ---------- composer ---------- */
+
+.deck-file-zone {
+    padding: 16px;
+    text-align: center;
+    border: 1.5px dashed var(--deck-grey);
+    border-radius: 16px;
+    background: var(--deck-mist);
+}
+
+.deck-file-zone.has-file {
+    border-style: solid;
+    border-color: var(--deck-send);
+    background: var(--deck-send-soft);
+}
+
+.deck-file-name {
+    display: block;
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 800;
+    word-break: break-all;
+}
+
+.deck-file-zone .ant-btn {
+    width: 100%;
+    min-height: 52px;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.deck-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0;
+    color: var(--deck-ink-soft);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.deck-divider::before,
+.deck-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--deck-line);
+}
+
+.deck-msg-row {
+    display: flex;
+    gap: 8px;
+}
+
+@media (max-width: 480px) {
+    .deck-msg-row {
+        flex-direction: column;
+    }
+
+    .deck-msg-row .ant-btn {
+        width: 100%;
+    }
+}
+
+.deck-msg-row .ant-input {
+    min-height: 52px;
+}
+
+.deck-msg-row .ant-btn {
+    flex-shrink: 0;
+    min-height: 52px;
+    font-weight: 800;
+}
+
+.deck-progress {
+    margin-top: 12px;
+}
+
+.deck-progress .ant-progress-bg {
+    background: var(--deck-send);
+}
+
+.deck-progress .ant-progress-text {
+    font-family: var(--deck-mono);
+    font-size: 12px;
+}
+
+/* ---------- history ---------- */
+
+.deck-history {
+    margin-top: 24px;
+}
+
+.deck-history-title {
+    margin: 0 0 12px;
+    font-size: 18px;
+    line-height: 1.3;
+    font-weight: 800;
+}
+
+.deck-history-card {
+    background: var(--deck-card);
+    border-radius: 20px;
+    box-shadow: var(--deck-shadow-card);
+    padding: 8px 16px;
+}
+
+.deck-history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.deck-history-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--deck-line);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.deck-history-item:last-child {
+    border-bottom: none;
+}
+
+.deck-history-direction {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--deck-card);
+    font-size: 14px;
+}
+
+.deck-history-direction-sent {
+    background: var(--deck-send);
+}
+
+.deck-history-direction-received {
+    background: var(--deck-receive);
+}
+
+.deck-history-type {
+    flex-shrink: 0;
+    color: var(--deck-ink-soft);
+    font-size: 15px;
+}
+
+.deck-history-label {
+    flex: 1;
+    min-width: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.deck-history-peer {
+    flex-shrink: 0;
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    color: var(--deck-ink-soft);
+}
+
+.deck-history-time {
+    flex-shrink: 0;
+    font-family: var(--deck-mono);
+    font-size: 12px;
+    color: var(--deck-ink-soft);
+}
+
+@media (max-width: 480px) {
+    .deck-history-item {
+        flex-wrap: wrap;
+        row-gap: 4px;
+    }
+
+    .deck-history-label {
+        flex: 1 1 calc(100% - 83px);
+    }
+
+    .deck-history-peer {
+        max-width: none;
+    }
+}
+
+.deck-history-empty {
+    margin: 0;
+    padding: 16px;
+    background: var(--deck-card);
+    border-radius: 20px;
+    box-shadow: var(--deck-shadow-card);
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--deck-ink-soft);
+}
+
+/* ---------- display name (start panel) ---------- */
+
+.deck-name-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--deck-ink-soft);
+}
+
+.deck-start-panel .ant-input {
+    min-height: 52px;
+    margin-bottom: 16px;
+    text-align: center;
+    font-size: 15px;
+}
+
+/* ---------- pressed states ---------- */
+
+.deck-page .ant-btn:active {
+    filter: brightness(0.96);
+}
+
+.deck-peer:active {
+    background: var(--deck-mist);
+}
+
+.deck-stop:active {
+    color: var(--deck-mauve);
+}
