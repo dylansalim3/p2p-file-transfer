@@ -1,56 +1,50 @@
-import {ConnectionActionType} from "./connectionTypes";
-import {Dispatch} from "redux";
-import {DataType, PeerConnection} from "../../helpers/peer";
-import {message} from "antd";
-import download from "js-file-download";
-import copy from 'copy-to-clipboard';
-import {addHistoryEntry} from "../history/historyActions";
+import { ConnectionActionType } from './connectionTypes'
+import { Dispatch } from 'redux'
+import { Transport, codeRoomId } from '../../helpers/transport'
+import { message } from 'antd'
 
 export const changeConnectionInput = (id: string) => ({
-    type: ConnectionActionType.CONNECTION_INPUT_CHANGE, id
+    type: ConnectionActionType.CONNECTION_INPUT_CHANGE,
+    id,
 })
 
 export const setLoading = (loading: boolean) => ({
-    type: ConnectionActionType.CONNECTION_CONNECT_LOADING, loading
+    type: ConnectionActionType.CONNECTION_CONNECT_LOADING,
+    loading,
 })
 export const addConnectionList = (id: string) => ({
-    type: ConnectionActionType.CONNECTION_LIST_ADD, id
+    type: ConnectionActionType.CONNECTION_LIST_ADD,
+    id,
 })
 
 export const removeConnectionList = (id: string) => ({
-    type: ConnectionActionType.CONNECTION_LIST_REMOVE, id
+    type: ConnectionActionType.CONNECTION_LIST_REMOVE,
+    id,
 })
 
 export const selectItem = (id: string) => ({
-    type: ConnectionActionType.CONNECTION_ITEM_SELECT, id
+    type: ConnectionActionType.CONNECTION_ITEM_SELECT,
+    id,
 })
 
-export const connectPeer: (id: string) => (dispatch: Dispatch) => Promise<void>
-    = (id: string) => (async (dispatch) => {
-    dispatch(setLoading(true))
-    try {
-        await PeerConnection.connectPeer(id)
-        PeerConnection.onConnectionDisconnected(id, () => {
-            message.info("Connection closed: " + id)
-            dispatch(removeConnectionList(id))
-        })
-        PeerConnection.onConnectionReceiveData(id, (file) => {
-            message.info("Receiving file " + file.fileName + " from " + id)
-            if (file.dataType === DataType.FILE) {
-                dispatch(addHistoryEntry('received-file', file.fileName || "file", id))
-                download(file.file || '', file.fileName || "fileName", file.fileType)
-            } else if (file.dataType === DataType.MSG && file.message) {
-                dispatch(addHistoryEntry('received-msg', file.message, id))
-                console.log(file.message)
-                copy(file.message)
+// Joining a room is the whole "connect" step now: any device in the same
+// room shows up in discovery, and a tap + accept turns it into a connection.
+export const connectPeer: (id: string) => (dispatch: Dispatch) => Promise<void> =
+    (id: string) =>
+    async (dispatch) => {
+        dispatch(setLoading(true))
+        try {
+            const clean = id.trim().toLowerCase()
+            if (!clean) {
+                message.warning('Please enter an ID or code')
+                dispatch(setLoading(false))
+                return
             }
-        })
-        dispatch(addConnectionList(id))
-        dispatch(setLoading(false))
-    } catch (err) {
-        dispatch(setLoading(false))
-        console.log(err)
+            Transport.joinRoom(codeRoomId(clean), 'code', 'link')
+            dispatch(setLoading(false))
+            message.info('Joined — devices in this room will show up below')
+        } catch (err) {
+            dispatch(setLoading(false))
+            console.log(err)
+        }
     }
-})
-
-

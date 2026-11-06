@@ -3,9 +3,11 @@ import {Reducer} from "redux";
 import {PeerReducer} from "./peer/peerReducer";
 import {ConnectionReducer} from "./connection/connectionReducer";
 import {HistoryReducer} from "./history/historyReducer";
+import {DiscoveryReducer} from "./discovery/discoveryReducer";
 import {PeerState} from "./peer/peerTypes";
 import {ConnectionState} from "./connection/connectionTypes";
 import {HistoryState} from "./history/historyTypes";
+import {DiscoveryState} from "./discovery/discoveryTypes";
 
 // The reducers are typed with the app's own discriminated action unions.
 // The store may also dispatch internal actions (e.g. @@redux/INIT), which
@@ -15,7 +17,8 @@ export const store = configureStore({
     reducer: {
         peer: PeerReducer as Reducer<PeerState>,
         connection: ConnectionReducer as Reducer<ConnectionState>,
-        history: HistoryReducer as Reducer<HistoryState>
+        history: HistoryReducer as Reducer<HistoryState>,
+        discovery: DiscoveryReducer as Reducer<DiscoveryState>
     }
 })
 

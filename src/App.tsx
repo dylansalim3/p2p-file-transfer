@@ -1,11 +1,13 @@
-import React from 'react';
-import { Button, ConfigProvider, Input, message, QRCode, Upload, UploadFile } from "antd";
-import { ArrowDownOutlined, ArrowUpOutlined, CheckOutlined, CopyOutlined, FileOutlined, MessageOutlined, SendOutlined, UploadOutlined } from "@ant-design/icons";
+import React, { useState } from 'react';
+import { Button, ConfigProvider, Input, Progress, message, QRCode, Upload, UploadFile } from "antd";
+import { ArrowDownOutlined, ArrowUpOutlined, CheckOutlined, CloseOutlined, CopyOutlined, EnvironmentOutlined, FileOutlined, KeyOutlined, LinkOutlined, MessageOutlined, RadarChartOutlined, SendOutlined, UploadOutlined } from "@ant-design/icons";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
-import { startPeer, stopPeerSession } from "./store/peer/peerActions";
+import { changeDisplayName, startPeer, stopPeer } from "./store/peer/peerActions";
 import * as connectionAction from "./store/connection/connectionActions"
+import { acceptPeer, declinePeer, findNearby, joinCodeRoom, requestPeer } from "./store/discovery/discoveryActions";
 import { addHistoryEntry } from "./store/history/historyActions";
-import { Data, DataType, PeerConnection } from "./helpers/peer";
+import { Transport } from "./helpers/transport";
+import { loadDisplayName } from "./helpers/displayName";
 import { useAsyncState } from "./helpers/hooks";
 import { useParams } from "react-router-dom"
 import "./beam.css";
@@ -24,9 +26,17 @@ export const App: React.FC = () => {
     const peer = useAppSelector((state) => state.peer)
     const connection = useAppSelector((state) => state.connection)
     const history = useAppSelector((state) => state.history)
+    const discovery = useAppSelector((state) => state.discovery)
     const dispatch = useAppDispatch()
 
+    const nameOf = (peerId: string) => discovery.names[peerId] ?? peerId.slice(0, 8)
+    const viaLabel = (via: string) => via === 'nearby' ? 'Nearby' : via === 'code' ? 'Code' : 'Link'
+
+    const [nameInput, setNameInput] = useState(() => loadDisplayName())
+    const [codeInput, setCodeInput] = useState("")
+
     const handleStartSession = () => {
+        dispatch(changeDisplayName(nameInput))
         dispatch(startPeer())
             .then(function () {
                 if (shareId) {
@@ -36,8 +46,7 @@ export const App: React.FC = () => {
     }
 
     const handleStopSession = async () => {
-        await PeerConnection.closePeerSession()
-        dispatch(stopPeerSession())
+        await dispatch(stopPeer())
     }
 
     const handleConnectOtherPeer = () => {
@@ -47,46 +56,46 @@ export const App: React.FC = () => {
     const [fileList, setFileList] = useAsyncState([] as UploadFile[])
     const [sendLoading, setSendLoading] = useAsyncState(false)
     const [msgToSend, setMsgToSend] = useAsyncState("")
+    const [sendProgress, setSendProgress] = useState<number | null>(null)
 
-    const handleUpload = async (dataType: DataType) => {
+    const handleUpload = async (kind: 'file' | 'msg') => {
         if (!connection.selectedId) {
             message.warning("Please select a connection")
             return
         }
-
-        let data: Data = {
-            dataType: DataType.MSG,
-            message: msgToSend
-        }
+        const peerId = connection.selectedId
+        const peerLabel = nameOf(peerId)
 
         try {
-            if (dataType === DataType.FILE) {
+            if (kind === 'file') {
                 if (fileList.length === 0) {
                     message.warning("Please select file")
                     return
                 }
+                const file = fileList[0] as unknown as File;
+                const data = await file.arrayBuffer()
                 await setSendLoading(true);
-                let file = fileList[0] as unknown as File;
-                let blob = new Blob([file], { type: file.type });
-
-                data = {
-                    dataType: DataType.FILE,
-                    file: blob,
-                    fileName: file.name,
-                    fileType: file.type
-                }
-            }
-
-            await PeerConnection.sendConnection(connection.selectedId, data)
-            if (dataType === DataType.FILE) {
-                dispatch(addHistoryEntry('sent-file', (fileList[0] as unknown as File).name, connection.selectedId))
+                setSendProgress(0)
+                await Transport.sendFile(peerId, data, { name: file.name, size: file.size, type: file.type },
+                    (percent) => setSendProgress(Math.round(percent * 100)))
+                dispatch(addHistoryEntry('sent-file', file.name, peerLabel))
+                setFileList([])
             } else {
-                dispatch(addHistoryEntry('sent-msg', msgToSend, connection.selectedId))
+                if (msgToSend.length === 0) {
+                    message.warning("Please write a message")
+                    return
+                }
+                await setSendLoading(true);
+                await Transport.sendMessage(peerId, msgToSend)
+                dispatch(addHistoryEntry('sent-msg', msgToSend, peerLabel))
+                setMsgToSend("")
             }
             await setSendLoading(false)
+            setSendProgress(null)
             message.info("Send successfully")
         } catch (err) {
             await setSendLoading(false)
+            setSendProgress(null)
             console.log(err)
             message.error(String(err))
         }
@@ -99,6 +108,7 @@ export const App: React.FC = () => {
         : !isConnected
             ? { label: 'Listening…', cls: 'is-listening' }
             : { label: `Connected · ${connection.list.length} device${connection.list.length === 1 ? '' : 's'}`, cls: 'is-live' }
+    const unconnected = discovery.discovered.filter(p => !connection.list.includes(p.peerId))
 
     return (
         <ConfigProvider theme={{
@@ -125,6 +135,14 @@ export const App: React.FC = () => {
                 {!peer.started && (
                     <section className="beam-start-panel" aria-label="Start a session">
                         <p>Start a session and your ID and QR code appear here. The other phone scans it, connects, and you send.</p>
+                        <label className="beam-name-label" htmlFor="displayName">Your name on the other phone</label>
+                        <Input
+                            id="displayName"
+                            value={nameInput}
+                            maxLength={24}
+                            onChange={e => setNameInput(e.target.value)}
+                            aria-label="Your display name"
+                        />
                         <Button type="primary" size="large" onClick={handleStartSession} loading={peer.loading}>Start session</Button>
                     </section>
                 )}
@@ -147,6 +165,8 @@ export const App: React.FC = () => {
                                     </div>
                                     <p className="beam-id-label">Your ID</p>
                                     <p className="beam-id">{peer.id}</p>
+                                    <p className="beam-id-label">Appearing as</p>
+                                    <p className="beam-id">{peer.displayName}</p>
                                     <Button onClick={async () => {
                                         await navigator.clipboard.writeText((getUrlPrefix() + peer.id) || "")
                                         message.info("Copied: " + getUrlPrefix() + peer.id)
@@ -162,8 +182,49 @@ export const App: React.FC = () => {
                             <span className="beam-step-dot" aria-hidden="true">{isConnected ? <CheckOutlined /> : '2'}</span>
                             <div className="beam-step-body">
                                 <h2 className="beam-step-title">Connect</h2>
-                                <p className="beam-step-hint">Paste the other phone&rsquo;s ID, or scan its QR with your camera — the link opens here with their ID already filled in.</p>
+                                <p className="beam-step-hint">Find the other phone nearby, join the same code, or paste its ID — then tap it and wait for the other side to accept.</p>
                                 <div className="beam-panel">
+                                    {discovery.incoming.length > 0 && (
+                                        <div className="beam-requests" role="group" aria-label="Connection requests">
+                                            {discovery.incoming.map(req => (
+                                                <div key={req.peerId} className="beam-request">
+                                                    <span className="beam-request-text"><strong>{req.name}</strong> wants to connect</span>
+                                                    <div className="beam-request-actions">
+                                                        <Button type="primary" onClick={() => dispatch(acceptPeer(req.peerId))}>Accept</Button>
+                                                        <Button onClick={() => dispatch(declinePeer(req.peerId))} icon={<CloseOutlined />}>Decline</Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    <h3 className="beam-connect-title"><EnvironmentOutlined /> Nearby devices</h3>
+                                    <p className="beam-note beam-note-tight">Uses your approximate area only — never your exact location.</p>
+                                    <Button
+                                        block
+                                        onClick={() => dispatch(findNearby())}
+                                        loading={discovery.nearbyLocating}
+                                        disabled={discovery.nearbyActive}
+                                        icon={<RadarChartOutlined />}
+                                    >
+                                        {discovery.nearbyActive ? 'Looking for devices nearby…' : 'Find nearby devices'}
+                                    </Button>
+                                    {discovery.nearbyError && <p className="beam-error" role="alert">{discovery.nearbyError}</p>}
+
+                                    <h3 className="beam-connect-title"><KeyOutlined /> Join with a code</h3>
+                                    <div className="beam-row">
+                                        <Input
+                                            placeholder="4–6 letter code"
+                                            value={codeInput}
+                                            maxLength={6}
+                                            onChange={e => setCodeInput(e.target.value)}
+                                            aria-label="Short code"
+                                        />
+                                        <Button onClick={() => { dispatch(joinCodeRoom(codeInput)); setCodeInput("") }}>Join</Button>
+                                    </div>
+                                    {discovery.codeRoom && <p className="beam-note">In code room “{discovery.codeRoom}” — the other phone enters the same code.</p>}
+
+                                    <h3 className="beam-connect-title"><LinkOutlined /> Paste an ID or link code</h3>
                                     <div className="beam-row">
                                         <Input
                                             placeholder="Phone ID"
@@ -174,8 +235,37 @@ export const App: React.FC = () => {
                                         />
                                         <Button type="primary" onClick={handleConnectOtherPeer} loading={connection.loading}>Connect</Button>
                                     </div>
+
+                                    {unconnected.length > 0 && (
+                                        <div className="beam-peer-list" style={{ marginTop: 16 }}>
+                                            {unconnected.map(found => {
+                                                const requested = discovery.outgoing.includes(found.peerId)
+                                                return (
+                                                    <button
+                                                        key={found.peerId}
+                                                        type="button"
+                                                        className="beam-peer beam-peer-stacked"
+                                                        disabled={requested}
+                                                        onClick={() => dispatch(requestPeer(found.peerId))}
+                                                    >
+                                                        <span className="beam-peer-top">
+                                                            <span className="beam-peer-name">{found.name}</span>
+                                                            <span className="beam-peer-via">{viaLabel(found.via)}</span>
+                                                        </span>
+                                                        <span className="beam-peer-bottom">
+                                                            <span className="beam-peer-id">{found.peerId.slice(0, 8)}</span>
+                                                            <span className="beam-peer-state">{requested ? 'Request sent…' : 'Tap to connect'}</span>
+                                                        </span>
+                                                    </button>
+                                                )
+                                            })}
+                                        </div>
+                                    )}
+
                                     {connection.list.length === 0 ? (
-                                        <p className="beam-note"><span className="beam-dot-signal" aria-hidden="true" /> Listening for a device…</p>
+                                        <p className="beam-note">
+                                            {unconnected.length === 0 && <><span className="beam-dot-signal" aria-hidden="true" /> Listening for a device…</>}
+                                        </p>
                                     ) : (
                                         <div className="beam-peer-list" style={{ marginTop: 12 }}>
                                             {connection.list.map(peerId => (
@@ -186,7 +276,10 @@ export const App: React.FC = () => {
                                                     aria-pressed={connection.selectedId === peerId}
                                                     onClick={() => dispatch(connectionAction.selectItem(peerId))}
                                                 >
-                                                    <span className="beam-peer-id">{peerId}</span>
+                                                    <span className="beam-peer-main">
+                                                        <span className="beam-peer-name">{nameOf(peerId)}</span>
+                                                        <span className="beam-peer-id">{peerId.slice(0, 8)}</span>
+                                                    </span>
                                                     <span className="beam-signal-bars" aria-hidden="true"><i /><i /><i /><i /></span>
                                                     <span className="beam-peer-state">Connected</span>
                                                 </button>
@@ -203,17 +296,27 @@ export const App: React.FC = () => {
                                 <h2 className="beam-step-title">Send</h2>
                                 <p className="beam-step-hint">
                                     {connection.selectedId
-                                        ? <>Sending to <span style={{ display: 'inline', wordBreak: 'break-all', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace', fontSize: 13 }}>{connection.selectedId}</span>. Pick a file or write a message.</>
+                                        ? <>Sending to <span style={{ display: 'inline', wordBreak: 'break-all', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace', fontSize: 13 }}>{nameOf(connection.selectedId)}</span>. Pick a file or write a message.</>
                                         : 'Connect to a device first, then pick a file or write a message.'}
                                 </p>
                                 <div className="beam-panel">
+                                    {discovery.receiving && (
+                                        <p className="beam-note beam-note-tight" role="status">
+                                            Receiving {discovery.receiving.name}… {discovery.receiving.percent}%
+                                        </p>
+                                    )}
                                     <div className={`beam-file-zone ${fileList.length > 0 ? 'has-file' : ''}`}>
                                         {fileList.length > 0 ? (
                                             <>
                                                 <span className="beam-file-name"><FileOutlined /> {(fileList[0] as unknown as File).name}</span>
-                                                <Button type="primary" onClick={() => handleUpload(DataType.FILE)} loading={sendLoading} icon={<SendOutlined />}>
+                                                <Button type="primary" onClick={() => handleUpload('file')} loading={sendLoading} icon={<SendOutlined />}>
                                                     {sendLoading ? 'Sending…' : 'Send file'}
                                                 </Button>
+                                                {sendProgress !== null && (
+                                                    <div className="beam-progress">
+                                                        <Progress percent={sendProgress} status="active" />
+                                                    </div>
+                                                )}
                                                 <div style={{ marginTop: 8 }}>
                                                     <Button type="link" onClick={() => setFileList([])}>Remove file</Button>
                                                 </div>
@@ -234,13 +337,14 @@ export const App: React.FC = () => {
                                     <div className="beam-msg-row">
                                         <Input
                                             placeholder="Write a message"
+                                            value={msgToSend}
                                             onChange={e => setMsgToSend(e.target.value)}
                                             required={true}
                                             aria-label="Message to send"
                                         />
                                         <Button
                                             type="primary"
-                                            onClick={() => handleUpload(DataType.MSG)}
+                                            onClick={() => handleUpload('msg')}
                                             disabled={msgToSend.length === 0}
                                             loading={sendLoading}
                                             icon={<SendOutlined />}

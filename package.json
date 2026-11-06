@@ -12,12 +12,12 @@
     "antd": "^6.7.0",
     "copy-to-clipboard": "^4.0.2",
     "js-file-download": "^0.4.12",
-    "peerjs": "^1.5.5",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-redux": "^9.3.1",
     "react-router-dom": "^7.18.5",
     "redux": "^5.0.1",
+    "trystero": "^0.26.0",
     "typescript": "^7.0.2",
     "web-vitals": "^6.2.3"
   },
