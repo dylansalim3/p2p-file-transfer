@@ -92,7 +92,6 @@ export const App: React.FC = () => {
             }
             await setSendLoading(false)
             setSendProgress(null)
-            message.info("Send successfully")
         } catch (err) {
             await setSendLoading(false)
             setSendProgress(null)
@@ -107,7 +106,7 @@ export const App: React.FC = () => {
         ? { label: 'Not started', cls: '' }
         : !isConnected
             ? { label: 'Listening…', cls: 'is-listening' }
-            : { label: `Connected · ${connection.list.length} device${connection.list.length === 1 ? '' : 's'}`, cls: 'is-live' }
+            : { label: `Connected to ${connection.list.length} device${connection.list.length === 1 ? '' : 's'}`, cls: 'is-live' }
     const unconnected = discovery.discovered.filter(p => !connection.list.includes(p.peerId))
 
     return (
@@ -130,7 +129,7 @@ export const App: React.FC = () => {
                         {status.label}
                     </span>
                 </header>
-                <p className="beam-tagline">Send a file straight to the phone next to you. No server, no upload — the beam goes direct.</p>
+                <p className="beam-tagline">Send a file straight to the phone next to you. No server, no upload. The beam goes direct.</p>
 
                 {!peer.started && (
                     <section className="beam-start-panel" aria-label="Start a session">
@@ -166,7 +165,7 @@ export const App: React.FC = () => {
                                     <p className="beam-id-label">Your ID</p>
                                     <p className="beam-id">{peer.id}</p>
                                     <p className="beam-id-label">Appearing as</p>
-                                    <p className="beam-id">{peer.displayName}</p>
+                                    <p className="beam-display-name">{peer.displayName}</p>
                                     <Button onClick={async () => {
                                         await navigator.clipboard.writeText((getUrlPrefix() + peer.id) || "")
                                         message.info("Copied: " + getUrlPrefix() + peer.id)
@@ -182,7 +181,7 @@ export const App: React.FC = () => {
                             <span className="beam-step-dot" aria-hidden="true">{isConnected ? <CheckOutlined /> : '2'}</span>
                             <div className="beam-step-body">
                                 <h2 className="beam-step-title">Connect</h2>
-                                <p className="beam-step-hint">Find the other phone nearby, join the same code, or paste its ID — then tap it and wait for the other side to accept.</p>
+                                <p className="beam-step-hint">Find the other phone nearby, join the same code, or paste its ID, then tap it and wait for the other side to accept.</p>
                                 <div className="beam-panel">
                                     {discovery.incoming.length > 0 && (
                                         <div className="beam-requests" role="group" aria-label="Connection requests">
@@ -199,7 +198,7 @@ export const App: React.FC = () => {
                                     )}
 
                                     <h3 className="beam-connect-title"><EnvironmentOutlined /> Nearby devices</h3>
-                                    <p className="beam-note beam-note-tight">Uses your approximate area only — never your exact location.</p>
+                                    <p className="beam-note beam-note-tight">Uses your approximate area only, never your exact location.</p>
                                     <Button
                                         block
                                         onClick={() => dispatch(findNearby())}
@@ -222,7 +221,7 @@ export const App: React.FC = () => {
                                         />
                                         <Button onClick={() => { dispatch(joinCodeRoom(codeInput)); setCodeInput("") }}>Join</Button>
                                     </div>
-                                    {discovery.codeRoom && <p className="beam-note">In code room “{discovery.codeRoom}” — the other phone enters the same code.</p>}
+                                    {discovery.codeRoom && <p className="beam-note">In code room “{discovery.codeRoom}”. The other phone enters the same code.</p>}
 
                                     <h3 className="beam-connect-title"><LinkOutlined /> Paste an ID or link code</h3>
                                     <div className="beam-row">
@@ -272,16 +271,18 @@ export const App: React.FC = () => {
                                                 <button
                                                     key={peerId}
                                                     type="button"
-                                                    className={`beam-peer ${connection.selectedId === peerId ? 'is-selected' : ''}`}
+                                                    className={`beam-peer beam-peer-stacked ${connection.selectedId === peerId ? 'is-selected' : ''}`}
                                                     aria-pressed={connection.selectedId === peerId}
                                                     onClick={() => dispatch(connectionAction.selectItem(peerId))}
                                                 >
-                                                    <span className="beam-peer-main">
+                                                    <span className="beam-peer-top">
                                                         <span className="beam-peer-name">{nameOf(peerId)}</span>
-                                                        <span className="beam-peer-id">{peerId.slice(0, 8)}</span>
+                                                        <span className="beam-signal-bars" aria-hidden="true"><i /><i /><i /><i /></span>
                                                     </span>
-                                                    <span className="beam-signal-bars" aria-hidden="true"><i /><i /><i /><i /></span>
-                                                    <span className="beam-peer-state">Connected</span>
+                                                    <span className="beam-peer-bottom">
+                                                        <span className="beam-peer-id">{peerId.slice(0, 8)}</span>
+                                                        <span className="beam-peer-state">Connected</span>
+                                                    </span>
                                                 </button>
                                             ))}
                                         </div>
@@ -296,7 +297,7 @@ export const App: React.FC = () => {
                                 <h2 className="beam-step-title">Send</h2>
                                 <p className="beam-step-hint">
                                     {connection.selectedId
-                                        ? <>Sending to <span style={{ display: 'inline', wordBreak: 'break-all', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace', fontSize: 13 }}>{nameOf(connection.selectedId)}</span>. Pick a file or write a message.</>
+                                        ? <>Sending to <span style={{ display: 'inline', wordBreak: 'break-all' }}>{nameOf(connection.selectedId)}</span>. Pick a file or write a message.</>
                                         : 'Connect to a device first, then pick a file or write a message.'}
                                 </p>
                                 <div className="beam-panel">
@@ -333,7 +334,7 @@ export const App: React.FC = () => {
                                             </Upload>
                                         )}
                                     </div>
-                                    <div className="beam-divider">or</div>
+                                    <div className="beam-divider">Or</div>
                                     <div className="beam-msg-row">
                                         <Input
                                             placeholder="Write a message"
@@ -363,7 +364,7 @@ export const App: React.FC = () => {
                     <section className="beam-history" aria-label="Transfer history">
                         <h2 className="beam-history-title">History</h2>
                         {history.entries.length === 0 ? (
-                            <p className="beam-history-empty">Nothing sent or received yet this session — your transfers will show up here.</p>
+                            <p className="beam-history-empty">Nothing sent or received yet this session. Your transfers will show up here.</p>
                         ) : (
                             <ul className="beam-history-list">
                                 {history.entries.map(entry => (

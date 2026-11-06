@@ -14,16 +14,22 @@
     --beam-signal-bright: #2dd4a8;
     --beam-wait: #92400e;
     --beam-danger: #cf222e;
+    --beam-grey: #8a8f98;
+    --beam-paper-dim: #d6d2c6;
+    --beam-wait-pulse: rgba(146, 64, 14, 0.45);
+    --beam-wait-pulse-zero: rgba(146, 64, 14, 0);
 }
 
 body {
     background: var(--beam-paper);
     color: var(--beam-ink);
+    caret-color: var(--beam-signal);
+    scrollbar-color: var(--beam-ink-soft) var(--beam-paper);
 }
 
 ::selection {
     background: var(--beam-signal);
-    color: #ffffff;
+    color: var(--beam-card);
 }
 
 :focus-visible {
@@ -63,7 +69,7 @@ body {
     margin: 0;
     font-size: 26px;
     line-height: 1.15;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: -0.02em;
 }
 
@@ -81,8 +87,8 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    margin-top: 6px;
-    padding: 6px 12px;
+    margin-top: 8px;
+    padding: 8px 12px;
     border: 1.5px solid var(--beam-ink);
     border-radius: 999px;
     background: var(--beam-card);
@@ -96,7 +102,7 @@ body {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #8a8f98;
+    background: var(--beam-grey);
     flex-shrink: 0;
 }
 
@@ -120,9 +126,9 @@ body {
 }
 
 @keyframes beam-pulse {
-    0% { box-shadow: 0 0 0 0 rgba(146, 64, 14, 0.45); }
-    70% { box-shadow: 0 0 0 7px rgba(146, 64, 14, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(146, 64, 14, 0); }
+    0% { box-shadow: 0 0 0 0 var(--beam-wait-pulse); }
+    70% { box-shadow: 0 0 0 7px var(--beam-wait-pulse-zero); }
+    100% { box-shadow: 0 0 0 0 var(--beam-wait-pulse-zero); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -145,7 +151,7 @@ body {
     margin: 0 0 16px;
     font-size: 15px;
     line-height: 1.55;
-    color: #d6d2c6;
+    color: var(--beam-paper-dim);
 }
 
 .beam-start-panel .ant-btn {
@@ -179,7 +185,7 @@ body {
 .beam-qr-card {
     display: inline-block;
     padding: 12px;
-    background: #ffffff;
+    background: var(--beam-card);
     border-radius: 8px;
     line-height: 0;
 }
@@ -188,8 +194,6 @@ body {
     margin: 16px 0 4px;
     font-size: 12px;
     font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--beam-signal-bright);
 }
 
@@ -197,6 +201,15 @@ body {
     margin: 0 0 16px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 14px;
+    line-height: 1.5;
+    word-break: break-all;
+    color: var(--beam-paper);
+}
+
+.beam-display-name {
+    margin: 0 0 16px;
+    font-size: 15px;
+    font-weight: 600;
     line-height: 1.5;
     word-break: break-all;
     color: var(--beam-paper);
@@ -210,12 +223,12 @@ body {
 
 .beam-stop {
     margin-top: 12px;
-    color: #d6d2c6;
+    color: var(--beam-paper-dim);
     font-size: 14px;
 }
 
 .beam-stop:hover {
-    color: #ffffff;
+    color: var(--beam-card);
 }
 
 /* ---------- stepper ---------- */
@@ -263,13 +276,13 @@ body {
     background: var(--beam-paper);
     color: var(--beam-ink-soft);
     font-size: 15px;
-    font-weight: 800;
+    font-weight: 700;
 }
 
 .beam-step.is-done .beam-step-dot {
     border-color: var(--beam-signal);
     background: var(--beam-signal);
-    color: #ffffff;
+    color: var(--beam-card);
 }
 
 .beam-step.is-now .beam-step-dot {
@@ -362,7 +375,7 @@ body {
     gap: 12px;
     width: 100%;
     min-height: 56px;
-    padding: 10px 12px;
+    padding: 8px 12px;
     text-align: left;
     background: var(--beam-card);
     border: 1.5px solid var(--beam-line);
@@ -422,7 +435,7 @@ body {
 .beam-empty {
     padding: 20px 16px;
     text-align: center;
-    border: 1.5px dashed #8a8f98;
+    border: 1.5px dashed var(--beam-grey);
     border-radius: 8px;
     color: var(--beam-ink-soft);
     font-size: 14px;
@@ -450,7 +463,7 @@ body {
 .beam-file-zone {
     padding: 16px;
     text-align: center;
-    border: 1.5px dashed #8a8f98;
+    border: 1.5px dashed var(--beam-grey);
     border-radius: 8px;
 }
 
@@ -480,8 +493,6 @@ body {
     color: var(--beam-ink-soft);
     font-size: 12px;
     font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
 }
 
 .beam-divider::before,
@@ -538,8 +549,8 @@ body {
 .beam-history-item {
     display: flex;
     align-items: baseline;
-    gap: 10px;
-    padding: 10px 0;
+    gap: 8px;
+    padding: 8px 0;
     border-bottom: 1px solid var(--beam-line);
     font-size: 14px;
     line-height: 1.45;
@@ -565,7 +576,6 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 12px;
     color: var(--beam-ink-soft);
 }
@@ -591,7 +601,7 @@ body {
     margin-bottom: 8px;
     font-size: 13px;
     font-weight: 600;
-    color: #d6d2c6;
+    color: var(--beam-paper-dim);
 }
 
 .beam-start-panel .ant-input {
@@ -667,14 +677,6 @@ body {
 
 /* ---------- discovered / connected peers ---------- */
 
-.beam-peer-main {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
 .beam-peer-name {
     font-size: 14px;
     font-weight: 700;
@@ -701,8 +703,9 @@ body {
 }
 
 .beam-peer:disabled {
-    cursor: default;
-    opacity: 0.75;
+    background: var(--beam-paper);
+    color: var(--beam-ink-soft);
+    cursor: not-allowed;
 }
 
 .beam-peer:disabled:hover {
@@ -714,7 +717,7 @@ body {
 .beam-peer-stacked {
     flex-direction: column;
     align-items: stretch;
-    gap: 6px;
+    gap: 8px;
 }
 
 .beam-peer-top,
@@ -743,4 +746,18 @@ body {
 .beam-progress .ant-progress-text {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 12px;
+}
+
+/* ---------- pressed states ---------- */
+
+.beam-page .ant-btn:active {
+    filter: brightness(0.96);
+}
+
+.beam-peer:active {
+    background: var(--beam-paper);
+}
+
+.beam-stop:active {
+    color: var(--beam-card);
 }

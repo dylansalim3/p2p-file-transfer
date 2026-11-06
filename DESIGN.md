@@ -16,7 +16,7 @@ typography:
   display:
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
     fontSize: "26px"
-    fontWeight: 800
+    fontWeight: 700
     lineHeight: 1.15
     letterSpacing: "-0.02em"
   title:
@@ -107,13 +107,13 @@ One accent on a paper-and-ink ground; the accent means "live signal" everywhere 
 **Body Font:** Same system sans stack.
 **Label/Mono Font:** ui-monospace, SFMono-Regular, Menlo, Consolas, monospace — for peer IDs, session IDs, and timestamps only.
 
-**Character:** A workhorse grotesque with one loud weight step (800 for the title, 700 for step titles) and mono where the content is literally a code.
+**Character:** A workhorse grotesque with 700 for the title, step titles and step dots, and mono where the content is literally a code.
 
 ### Hierarchy
-- **Display** (800, 26px, 1.15, -0.02em): The page title, "P2P File Transfer", once per screen.
+- **Display** (700, 26px, 1.15, -0.02em): The page title, "P2P File Transfer", once per screen.
 - **Title** (700, 17px, 1.3): Step titles ("Your signal", "Connect", "Send") and the History heading.
 - **Body** (400, 15px, 1.5): Hints, notes, empty states.
-- **Label** (400, 13px, mono): Peer IDs, timestamps, the "Your ID" label (700, 12px, 0.08em tracked, uppercase).
+- **Label** (400, 13px, mono): Peer IDs and timestamps. The "Your ID" label and the "Or" divider are body face, sentence case, untracked (700, 12px) — changed from tracked uppercase in the Hallmark audit polish (2026-11-06), which overrules the old tracked-caps label voice.
 
 ### Named Rules
 **The Mono Is Data Rule.** If it is not an ID, a code, or a timestamp, it is not set in mono.
@@ -143,7 +143,7 @@ Corners are small and consistent: 6px for buttons and inputs, 8px for panels and
 
 ### Status pill
 - **Style:** White pill, 1.5px ink border, 999px radius, 13px semibold text, an 8px dot on the left.
-- **State:** Grey dot "Not started"; amber pulsing dot "Listening…"; teal dot "Connected · N devices".
+- **State:** Grey dot "Not started"; amber pulsing dot "Listening…"; teal dot "Connected to N devices".
 
 ### QR hero panel
 - **Style:** Ink background, 12px radius, centred; a white QR card (12px padding, 8px radius) holding a 216px QR code; three thin quarter-arc rings in signal bright at the top-right corner; "Your ID" label in signal bright above the mono ID; full-width Copy link button; quiet Stop session below.
@@ -160,10 +160,10 @@ Corners are small and consistent: 6px for buttons and inputs, 8px for panels and
 - **Disabled:** The message Send button is disabled until text is typed; the file Send button is hidden until a file is picked.
 
 ### Composer
-- **Style:** One white panel holding both send paths: a dashed file zone (solid teal border once a file is picked, showing its name and a Remove link) and, below an "OR" divider, the message input with its Send button. A note underneath states the real behaviour: files auto-download on the other phone, messages are copied to its clipboard.
+- **Style:** One white panel holding both send paths: a dashed file zone (solid teal border once a file is picked, showing its name and a Remove link) and, below an "Or" divider, the message input with its Send button. A note underneath states the real behaviour: files auto-download on the other phone, messages are copied to its clipboard.
 
 ### History
-- **Style:** A plain list under a hairline rule; each row carries a direction arrow (up = sent, down = received) and a type icon (file/message), a label that may wrap to two lines, the peer ID in mono, and a mono timestamp. Empty state: one line of secondary text.
+- **Style:** A plain list under a hairline rule; each row carries a direction arrow (up = sent, down = received) and a type icon (file/message), a label that may wrap to two lines, the peer name in body face, and a mono timestamp. Empty state: one line of secondary text.
 
 ## Do's and Don'ts
 
