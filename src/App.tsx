@@ -118,7 +118,11 @@ export const App: React.FC = () => {
                 colorError: '#974a63',
                 colorTextPlaceholder: '#5b7285',
                 colorBgLayout: '#d9eaf5',
-                borderRadius: 16,
+                colorBgContainer: '#ffffff',
+                colorBorder: '#c7d8e5',
+                borderRadius: 6,
+                controlHeight: 44,
+                fontSize: 16,
                 fontFamily: '"Nunito", ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
             }
         }}>
@@ -360,7 +364,7 @@ export const App: React.FC = () => {
                                                     </div>
                                                 )}
                                                 <div style={{ marginTop: 8 }}>
-                                                    <Button type="link" onClick={() => setFileList([])}>Remove file</Button>
+                                                    <Button type="link" onClick={() => setFileList([])}>Clear selection</Button>
                                                 </div>
                                             </>
                                         ) : (
@@ -423,7 +427,7 @@ export const App: React.FC = () => {
                                                 {entry.kind === 'received-msg' && `Received “${entry.label}”`}
                                             </span>
                                             <span className="deck-history-peer">{entry.peerId}</span>
-                                            <time className="deck-history-time">{formatTime(entry.at)}</time>
+                                            <time className="deck-history-time" dateTime={new Date(entry.at).toISOString()}>{formatTime(entry.at)}</time>
                                         </li>
                                     ))}
                                 </ul>
