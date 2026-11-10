@@ -536,35 +536,16 @@ li {
     font-weight: 700;
 }
 
-/* Requests and peer rows */
-.deck-requests {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 12px;
+/* Incoming requests use a blocking, explicit-choice dialog. */
+.deck-connection-dialog-copy {
+    margin: 0;
+    color: var(--deck-ink-soft);
+    font-size: 15px;
+    line-height: 1.6;
 }
 
-.deck-request {
-    padding: 12px;
-    border: 1px solid var(--deck-receive);
-    border-radius: var(--deck-radius-control);
-    background: var(--deck-receive-soft);
-}
-
-.deck-request-text {
-    display: block;
-    margin-bottom: 10px;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.deck-request-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.deck-request-actions .ant-btn {
-    flex: 1;
+.deck-connection-dialog-copy strong {
+    color: var(--deck-ink);
 }
 
 .deck-peer-list {
@@ -819,6 +800,16 @@ li {
     font-variant-numeric: tabular-nums;
 }
 
+.deck-history-actions {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 6px;
+}
+
+.deck-history-actions .ant-btn {
+    min-height: 36px;
+}
+
 .deck-history-empty {
     margin: 0;
     padding: 16px;
@@ -898,10 +889,6 @@ li {
         width: 100%;
     }
 
-    .deck-request-actions {
-        flex-direction: column;
-    }
-
     .deck-history-item {
         flex-wrap: wrap;
         row-gap: 6px;
@@ -914,6 +901,10 @@ li {
     .deck-history-peer {
         flex: 1 1 auto;
         max-width: calc(100% - 100px);
+        margin-left: 44px;
+    }
+
+    .deck-history-actions {
         margin-left: 44px;
     }
 }

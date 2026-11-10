@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { Button, ConfigProvider, Input, Progress, message, QRCode, Upload, UploadFile } from "antd";
-import { ArrowDownOutlined, ArrowUpOutlined, CheckOutlined, CloseOutlined, CopyOutlined, FileOutlined, KeyOutlined, LinkOutlined, MessageOutlined, RadarChartOutlined, SendOutlined, UploadOutlined } from "@ant-design/icons";
+import { Button, ConfigProvider, Input, Modal, Progress, message, QRCode, Upload, UploadFile } from "antd";
+import { ArrowDownOutlined, ArrowUpOutlined, CheckOutlined, CopyOutlined, DownloadOutlined, FileOutlined, KeyOutlined, LinkOutlined, MessageOutlined, RadarChartOutlined, SendOutlined, UploadOutlined } from "@ant-design/icons";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { changeDisplayName, startPeer, stopPeer } from "./store/peer/peerActions";
 import * as connectionAction from "./store/connection/connectionActions"
 import { acceptPeer, declinePeer, findNearby, joinCodeRoom, requestPeer } from "./store/discovery/discoveryActions";
-import { addHistoryEntry } from "./store/history/historyActions";
+import { addHistoryEntry, getHistoryPayload } from "./store/history/historyActions";
 import { Transport } from "./helpers/transport";
 import { loadDisplayName } from "./helpers/displayName";
 import { useAsyncState } from "./helpers/hooks";
 import { useParams } from "react-router-dom"
+import download from 'js-file-download'
 import "./share.css";
 
 function getUrlPrefix() {
@@ -27,6 +28,7 @@ export const App: React.FC = () => {
     const connection = useAppSelector((state) => state.connection)
     const history = useAppSelector((state) => state.history)
     const discovery = useAppSelector((state) => state.discovery)
+    const incomingRequest = discovery.incoming[0]
     const dispatch = useAppDispatch()
 
     const nameOf = (peerId: string) => discovery.names[peerId] ?? peerId.slice(0, 8)
@@ -47,6 +49,29 @@ export const App: React.FC = () => {
 
     const handleStopSession = async () => {
         await dispatch(stopPeer())
+    }
+
+    const handleCopyHistoryMessage = async (entryId: string) => {
+        const payload = getHistoryPayload(entryId)
+        if (!payload || payload.kind !== 'text') {
+            message.error('This message is no longer available in this session')
+            return
+        }
+        try {
+            await navigator.clipboard.writeText(payload.text)
+            message.success('Message copied')
+        } catch {
+            message.error('Could not copy message')
+        }
+    }
+
+    const handleDownloadHistoryFile = (entryId: string) => {
+        const payload = getHistoryPayload(entryId)
+        if (!payload || payload.kind !== 'file') {
+            message.error('This file is no longer available in this session')
+            return
+        }
+        download(payload.blob, payload.fileName, payload.blob.type)
     }
 
     const handleConnectOtherPeer = () => {
@@ -78,7 +103,11 @@ export const App: React.FC = () => {
                 setSendProgress(0)
                 await Transport.sendFile(peerId, data, { name: file.name, size: file.size, type: file.type },
                     (percent) => setSendProgress(Math.round(percent * 100)))
-                dispatch(addHistoryEntry('sent-file', file.name, peerLabel))
+                dispatch(addHistoryEntry('sent-file', file.name, peerLabel, {
+                    kind: 'file',
+                    blob: file,
+                    fileName: file.name,
+                }))
                 setFileList([])
             } else {
                 if (msgToSend.length === 0) {
@@ -87,7 +116,7 @@ export const App: React.FC = () => {
                 }
                 await setSendLoading(true);
                 await Transport.sendMessage(peerId, msgToSend)
-                dispatch(addHistoryEntry('sent-msg', msgToSend, peerLabel))
+                dispatch(addHistoryEntry('sent-msg', msgToSend, peerLabel, { kind: 'text', text: msgToSend }))
                 setMsgToSend("")
             }
             await setSendLoading(false)
@@ -137,6 +166,25 @@ export const App: React.FC = () => {
                         {status.label}
                     </span>
                 </header>
+                {incomingRequest && (
+                    <Modal
+                        className="deck-connection-modal"
+                        title="Connection request"
+                        open
+                        centered
+                        closable={false}
+                        maskClosable={false}
+                        keyboard={false}
+                        footer={[
+                            <Button key="decline" onClick={() => dispatch(declinePeer(incomingRequest.peerId))}>Decline</Button>,
+                            <Button key="accept" type="primary" onClick={() => dispatch(acceptPeer(incomingRequest.peerId))}>Accept</Button>,
+                        ]}
+                    >
+                        <p className="deck-connection-dialog-copy">
+                            <strong>{incomingRequest.name}</strong> wants to connect. Accept to allow file and message transfers.
+                        </p>
+                    </Modal>
+                )}
                 <p className="deck-tagline">Send a file straight to the phone next to you. No server, no upload. It goes direct.</p>
 
                 {!peer.started && (
@@ -223,20 +271,6 @@ export const App: React.FC = () => {
                                     </svg>
                                     <figcaption className="deck-exchange-caption">The file goes straight across</figcaption>
                                 </figure>
-                                    {discovery.incoming.length > 0 && (
-                                        <div className="deck-requests" role="group" aria-label="Connection requests">
-                                            {discovery.incoming.map(req => (
-                                                <div key={req.peerId} className="deck-request">
-                                                    <span className="deck-request-text"><strong>{req.name}</strong> wants to connect</span>
-                                                    <div className="deck-request-actions">
-                                                        <Button type="primary" onClick={() => dispatch(acceptPeer(req.peerId))}>Accept</Button>
-                                                        <Button onClick={() => dispatch(declinePeer(req.peerId))} icon={<CloseOutlined />}>Decline</Button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-
                                     <div className="deck-method">
                                         <h3 className="deck-connect-title"><span className="deck-connect-icon deck-connect-icon-blue"><RadarChartOutlined /></span> Nearby devices</h3>
                                         <p className="deck-note deck-note-tight">Uses your approximate area only, never your exact location.</p>
@@ -428,6 +462,13 @@ export const App: React.FC = () => {
                                             </span>
                                             <span className="deck-history-peer">{entry.peerId}</span>
                                             <time className="deck-history-time" dateTime={new Date(entry.at).toISOString()}>{formatTime(entry.at)}</time>
+                                            <span className="deck-history-actions">
+                                                {entry.kind.endsWith('msg') ? (
+                                                    <Button size="small" icon={<CopyOutlined />} aria-label="Copy message" onClick={() => void handleCopyHistoryMessage(entry.id)}>Copy</Button>
+                                                ) : (
+                                                    <Button size="small" icon={<DownloadOutlined />} aria-label={`Download ${entry.label}`} onClick={() => handleDownloadHistoryFile(entry.id)}>Download</Button>
+                                                )}
+                                            </span>
                                         </li>
                                     ))}
                                 </ul>

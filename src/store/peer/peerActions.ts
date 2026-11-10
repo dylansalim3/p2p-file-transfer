@@ -70,7 +70,6 @@ export const startPeer: () => (dispatch: Dispatch, getState: () => RootState) =>
                     },
                     onRequest: (peerId, name) => {
                         dispatch(requestIncoming(peerId, name))
-                        message.info(`${name} wants to connect`)
                     },
                     onAccepted: (peerId) => {
                         dispatch(addConnectionList(peerId))
@@ -83,12 +82,17 @@ export const startPeer: () => (dispatch: Dispatch, getState: () => RootState) =>
                     },
                     onFile: (peerId, data, meta) => {
                         dispatch(receivingDone())
-                        dispatch(addHistoryEntry('received-file', meta.name, nameOf(peerId)))
-                        download(new Blob([data], { type: meta.type }), meta.name, meta.type)
+                        const fileBlob = new Blob([data], { type: meta.type })
+                        dispatch(addHistoryEntry('received-file', meta.name, nameOf(peerId), {
+                            kind: 'file',
+                            blob: fileBlob,
+                            fileName: meta.name,
+                        }))
+                        download(fileBlob, meta.name, meta.type)
                         message.info(`Received file ${meta.name} from ${nameOf(peerId)}`)
                     },
                     onMessage: (peerId, text) => {
-                        dispatch(addHistoryEntry('received-msg', text, nameOf(peerId)))
+                        dispatch(addHistoryEntry('received-msg', text, nameOf(peerId), { kind: 'text', text }))
                         navigator.clipboard.writeText(text).catch(() => undefined)
                         message.info(`Received a message from ${nameOf(peerId)} — copied to clipboard`)
                     },
