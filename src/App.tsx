@@ -120,8 +120,8 @@ export const App: React.FC = () => {
                 colorBgLayout: '#d9eaf5',
                 colorBgContainer: '#ffffff',
                 colorBorder: '#c7d8e5',
-                borderRadius: 6,
-                controlHeight: 44,
+                borderRadius: 16,
+                controlHeight: 48,
                 fontSize: 16,
                 fontFamily: '"Nunito", ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
             }
