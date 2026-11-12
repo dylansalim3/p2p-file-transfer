@@ -544,6 +544,63 @@ li {
     line-height: 1.6;
 }
 
+.deck-file-category-hint {
+    margin: 0 0 16px;
+    color: var(--deck-ink-soft);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.deck-file-categories {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.deck-file-category.ant-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+    min-height: 76px;
+    height: auto;
+    padding: 12px;
+    text-align: left;
+    white-space: normal;
+}
+
+.deck-file-category.ant-btn > .anticon {
+    flex: 0 0 auto;
+    margin-inline-end: 0;
+    color: var(--deck-send);
+    font-size: 20px;
+}
+
+.deck-file-category-copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+}
+
+.deck-file-category-copy strong {
+    color: var(--deck-ink);
+    font-size: 14px;
+    line-height: 1.3;
+}
+
+.deck-file-category-copy span {
+    color: var(--deck-ink-soft);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.deck-file-input {
+    display: none;
+}
+
 .deck-connection-dialog-copy strong {
     color: var(--deck-ink);
 }
@@ -648,6 +705,40 @@ li {
     border-radius: var(--deck-radius-control);
     background: var(--deck-mist);
     text-align: center;
+}
+
+.deck-paste-hint {
+    margin: 8px 0 0;
+    color: var(--deck-ink-soft);
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.deck-update-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--deck-line);
+    border-radius: var(--deck-radius-control);
+    background: var(--deck-card);
+    color: var(--deck-ink);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+@media (max-width: 480px) {
+    .deck-update-banner {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .deck-file-categories {
+        grid-template-columns: 1fr;
+    }
 }
 
 .deck-file-zone.has-file {

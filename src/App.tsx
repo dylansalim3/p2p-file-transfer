@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Button, ConfigProvider, Input, Modal, Progress, message, QRCode, Upload, UploadFile } from "antd";
-import { ArrowDownOutlined, ArrowUpOutlined, CheckOutlined, CopyOutlined, DownloadOutlined, FileOutlined, KeyOutlined, LinkOutlined, MessageOutlined, RadarChartOutlined, SendOutlined, UploadOutlined } from "@ant-design/icons";
+import React, { useEffect, useRef, useState } from 'react';
+import { Button, ConfigProvider, Input, Modal, Progress, message, QRCode } from "antd";
+import { AndroidOutlined, ArrowDownOutlined, ArrowUpOutlined, CheckOutlined, CopyOutlined, DownloadOutlined, FileOutlined, KeyOutlined, LinkOutlined, MessageOutlined, PictureOutlined, RadarChartOutlined, SendOutlined, UploadOutlined, VideoCameraOutlined } from "@ant-design/icons";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { changeDisplayName, startPeer, stopPeer } from "./store/peer/peerActions";
 import * as connectionAction from "./store/connection/connectionActions"
@@ -12,6 +12,7 @@ import { useAsyncState } from "./helpers/hooks";
 import { useParams } from "react-router-dom"
 import download from 'js-file-download'
 import "./share.css";
+import { applyServiceWorkerUpdate, registerServiceWorker } from './registerServiceWorker';
 
 function getUrlPrefix() {
     return window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1)
@@ -36,6 +37,11 @@ export const App: React.FC = () => {
 
     const [nameInput, setNameInput] = useState(() => loadDisplayName())
     const [codeInput, setCodeInput] = useState("")
+    const [updateAvailable, setUpdateAvailable] = useState(false)
+
+    useEffect(() => {
+        registerServiceWorker(() => setUpdateAvailable(true))
+    }, [])
 
     const handleStartSession = () => {
         dispatch(changeDisplayName(nameInput))
@@ -78,10 +84,57 @@ export const App: React.FC = () => {
         connection.id != null ? dispatch(connectionAction.connectPeer(connection.id || "")) : message.warning("Please enter ID")
     }
 
-    const [fileList, setFileList] = useAsyncState([] as UploadFile[])
+    const [fileList, setFileList] = useAsyncState([] as File[])
     const [sendLoading, setSendLoading] = useAsyncState(false)
     const [msgToSend, setMsgToSend] = useAsyncState("")
     const [sendProgress, setSendProgress] = useState<number | null>(null)
+    const [fileCategoryOpen, setFileCategoryOpen] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
+
+    const openFilePicker = (accept: string) => {
+        const input = fileInputRef.current
+        if (!input) return
+        input.accept = accept
+        input.value = ''
+        setFileCategoryOpen(false)
+        input.click()
+    }
+
+    const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.currentTarget.files?.[0]
+        if (file) setFileList([file])
+        event.currentTarget.value = ''
+    }
+
+    const handlePaste = (event: React.ClipboardEvent<HTMLElement>) => {
+        if (!peer.started || sendLoading) return
+        const imageItem = Array.from(event.clipboardData.items).find(
+            item => item.kind === 'file' && item.type.startsWith('image/'),
+        )
+        const image = imageItem?.getAsFile()
+        if (!image) return
+
+        event.preventDefault()
+        const type = image.type || imageItem?.type || 'image/png'
+        const extensionByType: Record<string, string> = {
+            'image/avif': 'avif',
+            'image/bmp': 'bmp',
+            'image/gif': 'gif',
+            'image/heic': 'heic',
+            'image/jpeg': 'jpg',
+            'image/png': 'png',
+            'image/svg+xml': 'svg',
+            'image/tiff': 'tif',
+            'image/webp': 'webp',
+        }
+        const extension = extensionByType[type] ?? type.split('/')[1]?.replace(/[^a-z0-9]/gi, '') ?? 'png'
+        const pastedImage = new File([image], `pasted-image-${Date.now()}.${extension}`, {
+            type,
+            lastModified: Date.now(),
+        })
+        setFileList([pastedImage])
+        message.success('Image ready to send')
+    }
 
     const handleUpload = async (kind: 'file' | 'msg') => {
         if (!connection.selectedId) {
@@ -97,7 +150,7 @@ export const App: React.FC = () => {
                     message.warning("Please select file")
                     return
                 }
-                const file = fileList[0] as unknown as File;
+                const file = fileList[0]
                 const data = await file.arrayBuffer()
                 await setSendLoading(true);
                 setSendProgress(0)
@@ -155,7 +208,7 @@ export const App: React.FC = () => {
                 fontFamily: '"Nunito", ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
             }
         }}>
-            <main className="deck-page">
+            <main className="deck-page" onPaste={handlePaste}>
                 <header className="deck-header">
                     <span className="deck-avatar" aria-hidden="true">{(peer.displayName || nameInput || 'P').trim().charAt(0).toUpperCase()}</span>
                     <div className="deck-title-block">
@@ -166,6 +219,19 @@ export const App: React.FC = () => {
                         {status.label}
                     </span>
                 </header>
+                {updateAvailable && (
+                    <aside className="deck-update-banner" role="status">
+                        <span>A new version is ready. Update after any active transfer finishes.</span>
+                        <Button
+                            type="primary"
+                            size="small"
+                            disabled={sendLoading || Boolean(discovery.receiving)}
+                            onClick={() => void applyServiceWorkerUpdate()}
+                        >
+                            Update app
+                        </Button>
+                    </aside>
+                )}
                 {incomingRequest && (
                     <Modal
                         className="deck-connection-modal"
@@ -185,6 +251,31 @@ export const App: React.FC = () => {
                         </p>
                     </Modal>
                 )}
+                <Modal
+                    className="deck-file-category-modal"
+                    title="Choose what to send"
+                    open={fileCategoryOpen}
+                    centered
+                    width={440}
+                    onCancel={() => setFileCategoryOpen(false)}
+                    footer={null}
+                >
+                    <p className="deck-file-category-hint">Choose a type to browse for. Your selection will use the usual direct-send flow.</p>
+                    <div className="deck-file-categories">
+                        <Button className="deck-file-category" icon={<PictureOutlined />} onClick={() => openFilePicker('image/*')}>
+                            <span className="deck-file-category-copy"><strong>Photo</strong><span>Images and screenshots</span></span>
+                        </Button>
+                        <Button className="deck-file-category" icon={<VideoCameraOutlined />} onClick={() => openFilePicker('video/*')}>
+                            <span className="deck-file-category-copy"><strong>Video</strong><span>Video clips</span></span>
+                        </Button>
+                        <Button className="deck-file-category" icon={<FileOutlined />} onClick={() => openFilePicker('')}>
+                            <span className="deck-file-category-copy"><strong>File</strong><span>Documents and other files</span></span>
+                        </Button>
+                        <Button className="deck-file-category" icon={<AndroidOutlined />} onClick={() => openFilePicker('.apk,application/vnd.android.package-archive')}>
+                            <span className="deck-file-category-copy"><strong>APK</strong><span>Android app packages</span></span>
+                        </Button>
+                    </div>
+                </Modal>
                 <p className="deck-tagline">Send a file straight to the phone next to you. No server, no upload. It goes direct.</p>
 
                 {!peer.started && (
@@ -386,9 +477,16 @@ export const App: React.FC = () => {
                                         </p>
                                     )}
                                     <div className={`deck-file-zone ${fileList.length > 0 ? 'has-file' : ''}`}>
+                                        <input
+                                            ref={fileInputRef}
+                                            className="deck-file-input"
+                                            type="file"
+                                            aria-label="Choose a file to send"
+                                            onChange={handleFileInputChange}
+                                        />
                                         {fileList.length > 0 ? (
                                             <>
-                                                <span className="deck-file-name"><FileOutlined /> {(fileList[0] as unknown as File).name}</span>
+                                                <span className="deck-file-name"><FileOutlined /> {fileList[0].name}</span>
                                                 <Button type="primary" onClick={() => handleUpload('file')} loading={sendLoading} icon={<SendOutlined />}>
                                                     {sendLoading ? 'Sending…' : 'Send file'}
                                                 </Button>
@@ -402,17 +500,10 @@ export const App: React.FC = () => {
                                                 </div>
                                             </>
                                         ) : (
-                                            <Upload fileList={[]}
-                                                maxCount={1}
-                                                showUploadList={false}
-                                                beforeUpload={(file) => {
-                                                    setFileList([file])
-                                                    return false
-                                                }}>
-                                                <Button icon={<UploadOutlined />}>Select a file</Button>
-                                            </Upload>
+                                            <Button icon={<UploadOutlined />} onClick={() => setFileCategoryOpen(true)}>Select a file</Button>
                                         )}
                                     </div>
+                                    <p className="deck-paste-hint">Copy an image, then press Ctrl+V (⌘+V on Mac) anywhere in the app.</p>
                                     <div className="deck-divider">Or</div>
                                     <div className="deck-msg-row">
                                         <Input
